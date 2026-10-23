@@ -1,0 +1,4 @@
+[
+  { "date": "2026-10-21", "bodyweight": 182.2, "proteinGrams": 184, "proteinTargetMin": 160, "proteinTargetMax": 200 },
+  { "date": "2026-10-22", "bodyweight": 182.4, "proteinGrams": null, "proteinTargetMin": 160, "proteinTargetMax": 200 }
+]

@@ -1,0 +1,19 @@
+{
+  "today": "2026-10-22",
+  "block": {
+    "blockNumber": 2,
+    "startDate": "2026-10-12",
+    "weeksInBlock": 3,
+    "phase": "Rebuild phase"
+  },
+  "firstWeek": "2026-09-21",
+  "weeksAhead": 4,
+  "weekTemplate": [
+    { "id": "conditioning-a", "kind": "conditioning", "title": "Full-body circuit A" },
+    { "id": "upper-mass", "kind": "upperMass", "title": "Bench + row" },
+    { "id": "lower-mass", "kind": "lowerMass", "title": "Squat + hinge" },
+    { "id": "conditioning-b", "kind": "conditioning", "title": "Full-body circuit B" }
+  ],
+  "defaultTrainingDays": [1, 2, 4, 6],
+  "proteinTarget": { "min": 160, "max": 200 }
+}

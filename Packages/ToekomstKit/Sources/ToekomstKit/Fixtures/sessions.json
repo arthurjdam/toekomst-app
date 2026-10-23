@@ -1,0 +1,230 @@
+[
+  {
+    "id": "lower-mass",
+    "kind": "lowerMass",
+    "title": "Squat + hinge",
+    "estimatedMinutes": 58,
+    "progressionNote": "Squat and split squat earned +5 lb.",
+    "equipment": ["Barbell + rack", "Plates", "Dumbbells", "Flat bench", "Leg curl machine", "Pull-up bar"],
+    "groups": [
+      {
+        "id": "warmup", "title": "Warm-up", "format": "straightSets", "estimatedMinutes": 8, "isWarmup": true,
+        "items": [
+          {
+            "id": "lm-air-bike", "exercise": "air-bike",
+            "prescription": { "sets": 1, "durationSeconds": 300, "note": "conversational pace", "restSeconds": 30 }
+          },
+          {
+            "id": "lm-goblet-squat", "exercise": "goblet-squat",
+            "prescription": { "sets": 2, "reps": { "min": 10, "max": 10 }, "load": 35, "restSeconds": 45 },
+            "setup": [{ "item": "One 35 lb dumbbell", "location": "Rack B" }]
+          }
+        ]
+      },
+      {
+        "id": "main", "title": "Main lifts", "format": "straightSets", "estimatedMinutes": 24,
+        "items": [
+          {
+            "id": "lm-back-squat", "exercise": "back-squat",
+            "prescription": { "sets": 4, "reps": { "min": 6, "max": 8 }, "load": 185, "restSeconds": 120 },
+            "progression": { "direction": "increase", "loadChange": 5, "reason": "8 reps on every set, two sessions running." },
+            "history": { "lastLoad": 180, "lastReps": [8, 8, 8, 8], "bestEstimatedMax": 240 },
+            "setup": [{ "item": "Barbell + rack", "location": "Rack 2" }, { "item": "Plates", "location": "Tree by rack 2" }]
+          },
+          {
+            "id": "lm-rdl", "exercise": "romanian-deadlift",
+            "prescription": { "sets": 3, "reps": { "min": 8, "max": 10 }, "load": 155, "restSeconds": 120 },
+            "progression": { "direction": "same", "reason": "9 and 10 reps last time. One more session at 155." },
+            "history": { "lastLoad": 155, "lastReps": [10, 9, 9], "bestEstimatedMax": 200 },
+            "setup": [{ "item": "Barbell", "location": "Rack 2" }]
+          }
+        ]
+      },
+      {
+        "id": "accessories", "title": "Accessories", "format": "straightSets", "estimatedMinutes": 18,
+        "items": [
+          {
+            "id": "lm-split-squat", "exercise": "bulgarian-split-squat",
+            "prescription": { "sets": 3, "reps": { "min": 10, "max": 12, "perSide": true }, "load": 30, "note": "each hand", "restSeconds": 90 },
+            "progression": { "direction": "increase", "loadChange": 5, "reason": "12 per side on every set, twice running." },
+            "history": { "lastLoad": 25, "lastReps": [12, 12, 12] },
+            "setup": [{ "item": "Two 30 lb dumbbells", "location": "Rack B" }, { "item": "Flat bench", "location": "Any" }],
+            "sideNote": "Left side first"
+          },
+          {
+            "id": "lm-leg-curl", "exercise": "lying-leg-curl",
+            "prescription": { "sets": 3, "reps": { "min": 10, "max": 12 }, "load": 70, "restSeconds": 75 },
+            "progression": { "direction": "same" },
+            "history": { "lastLoad": 70, "lastReps": [12, 11, 10] },
+            "setup": [{ "item": "Leg curl machine", "location": "Back wall" }]
+          },
+          {
+            "id": "lm-calf-raise", "exercise": "standing-calf-raise",
+            "prescription": { "sets": 4, "reps": { "min": 12, "max": 15 }, "load": 135, "restSeconds": 60 },
+            "progression": { "direction": "same" },
+            "history": { "lastLoad": 135, "lastReps": [14, 13, 13, 12] },
+            "setup": [{ "item": "Calf raise machine", "location": "Back wall" }]
+          }
+        ]
+      },
+      {
+        "id": "core", "title": "Core", "format": "straightSets", "estimatedMinutes": 5,
+        "items": [
+          {
+            "id": "lm-knee-raise", "exercise": "hanging-knee-raise",
+            "prescription": { "sets": 3, "reps": { "min": 12, "max": 12 }, "restSeconds": 45 },
+            "setup": [{ "item": "Pull-up bar", "location": "Rig" }]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "upper-mass",
+    "kind": "upperMass",
+    "title": "Bench + row",
+    "estimatedMinutes": 60,
+    "progressionNote": "Row earned +5 lb.",
+    "equipment": ["Barbell + bench", "Plates", "Dumbbells", "Incline bench", "Cable station", "Band"],
+    "groups": [
+      {
+        "id": "warmup", "title": "Warm-up", "format": "straightSets", "estimatedMinutes": 7, "isWarmup": true,
+        "items": [
+          {
+            "id": "um-row-erg", "exercise": "row-erg",
+            "prescription": { "sets": 1, "durationSeconds": 240, "note": "easy pace", "restSeconds": 30 }
+          },
+          {
+            "id": "um-pull-apart", "exercise": "band-pull-apart",
+            "prescription": { "sets": 2, "reps": { "min": 15, "max": 15 }, "note": "light band", "restSeconds": 30 }
+          }
+        ]
+      },
+      {
+        "id": "main", "title": "Main lifts", "format": "straightSets", "estimatedMinutes": 26,
+        "items": [
+          {
+            "id": "um-bench", "exercise": "bench-press",
+            "prescription": { "sets": 4, "reps": { "min": 6, "max": 8 }, "load": 165, "restSeconds": 120 },
+            "progression": { "direction": "same", "reason": "7s and 8s last time. Same load." },
+            "history": { "lastLoad": 165, "lastReps": [8, 8, 7, 7], "bestEstimatedMax": 205 },
+            "setup": [{ "item": "Bench + barbell", "location": "Bench 1" }]
+          },
+          {
+            "id": "um-row", "exercise": "barbell-row",
+            "prescription": { "sets": 4, "reps": { "min": 6, "max": 8 }, "load": 140, "restSeconds": 120 },
+            "progression": { "direction": "increase", "loadChange": 5, "reason": "8 reps on every set, two sessions running." },
+            "history": { "lastLoad": 135, "lastReps": [8, 8, 8, 8], "bestEstimatedMax": 180 },
+            "setup": [{ "item": "Barbell", "location": "Platform" }]
+          }
+        ]
+      },
+      {
+        "id": "accessories", "title": "Accessories", "format": "straightSets", "estimatedMinutes": 22,
+        "items": [
+          {
+            "id": "um-incline", "exercise": "incline-db-press",
+            "prescription": { "sets": 3, "reps": { "min": 8, "max": 10 }, "load": 55, "note": "each hand", "restSeconds": 90 },
+            "history": { "lastLoad": 55, "lastReps": [10, 9, 8] }
+          },
+          {
+            "id": "um-pulldown", "exercise": "lat-pulldown",
+            "prescription": { "sets": 3, "reps": { "min": 10, "max": 12 }, "load": 140, "restSeconds": 90 },
+            "history": { "lastLoad": 140, "lastReps": [12, 11, 10] }
+          },
+          {
+            "id": "um-lateral", "exercise": "lateral-raise",
+            "prescription": { "sets": 3, "reps": { "min": 12, "max": 15 }, "load": 20, "note": "each hand", "restSeconds": 60 },
+            "history": { "lastLoad": 20, "lastReps": [15, 14, 13] }
+          },
+          {
+            "id": "um-curl", "exercise": "db-curl",
+            "prescription": { "sets": 3, "reps": { "min": 10, "max": 12 }, "load": 30, "note": "each hand", "restSeconds": 60 },
+            "history": { "lastLoad": 30, "lastReps": [12, 11, 10] }
+          },
+          {
+            "id": "um-pushdown", "exercise": "cable-pushdown",
+            "prescription": { "sets": 3, "reps": { "min": 10, "max": 12 }, "load": 60, "restSeconds": 60 },
+            "history": { "lastLoad": 60, "lastReps": [12, 12, 11] }
+          }
+        ]
+      },
+      {
+        "id": "core", "title": "Core", "format": "straightSets", "estimatedMinutes": 5,
+        "items": [
+          {
+            "id": "um-pallof", "exercise": "pallof-press",
+            "prescription": { "sets": 3, "reps": { "min": 12, "max": 12, "perSide": true }, "load": 30, "restSeconds": 45 }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "conditioning-a",
+    "kind": "conditioning",
+    "title": "Full-body circuit A",
+    "estimatedMinutes": 34,
+    "equipment": ["Air bike", "Dumbbells", "Mat"],
+    "groups": [
+      {
+        "id": "warmup", "title": "Warm-up", "format": "straightSets", "estimatedMinutes": 5, "isWarmup": true,
+        "items": [
+          {
+            "id": "ca-air-bike", "exercise": "air-bike",
+            "prescription": { "sets": 1, "durationSeconds": 240, "note": "build to a steady pace", "restSeconds": 60 }
+          }
+        ]
+      },
+      {
+        "id": "circuit", "title": "Circuit", "format": "circuit", "estimatedMinutes": 24,
+        "rounds": 3, "transitionSeconds": 15, "roundRestSeconds": 90,
+        "items": [
+          { "id": "ca-goblet-squat", "exercise": "goblet-squat", "prescription": { "sets": 1, "durationSeconds": 40, "load": 50 } },
+          { "id": "ca-push-up", "exercise": "push-up", "prescription": { "sets": 1, "reps": { "min": 12, "max": 12 } } },
+          { "id": "ca-db-row", "exercise": "db-row", "prescription": { "sets": 1, "durationSeconds": 40, "load": 50, "note": "switch arms at 20s" } },
+          { "id": "ca-push-press", "exercise": "db-push-press", "prescription": { "sets": 1, "durationSeconds": 40, "load": 30, "note": "each hand" } },
+          { "id": "ca-dead-bug", "exercise": "dead-bug", "prescription": { "sets": 1, "durationSeconds": 40 } }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "conditioning-b",
+    "kind": "conditioning",
+    "title": "Full-body circuit B",
+    "estimatedMinutes": 35,
+    "progressionNote": "Adds hamstring and calf work to round out the week.",
+    "equipment": ["Air bike", "Dumbbells", "Kettlebell", "Mat"],
+    "groups": [
+      {
+        "id": "warmup", "title": "Warm-up", "format": "straightSets", "estimatedMinutes": 5, "isWarmup": true,
+        "items": [
+          {
+            "id": "cb-air-bike", "exercise": "air-bike",
+            "prescription": { "sets": 1, "durationSeconds": 240, "note": "build to a steady pace", "restSeconds": 60 }
+          }
+        ]
+      },
+      {
+        "id": "circuit", "title": "Circuit", "format": "circuit", "estimatedMinutes": 22,
+        "rounds": 3, "transitionSeconds": 15, "roundRestSeconds": 90,
+        "items": [
+          { "id": "cb-thruster", "exercise": "db-thruster", "prescription": { "sets": 1, "durationSeconds": 40, "load": 25, "note": "each hand" } },
+          { "id": "cb-sl-rdl", "exercise": "single-leg-rdl", "prescription": { "sets": 1, "durationSeconds": 40, "load": 35, "note": "switch legs at 20s" } },
+          { "id": "cb-kb-swing", "exercise": "kettlebell-swing", "prescription": { "sets": 1, "durationSeconds": 40, "load": 53 } },
+          { "id": "cb-push-up", "exercise": "push-up", "prescription": { "sets": 1, "reps": { "min": 12, "max": 12 } } },
+          { "id": "cb-pogo", "exercise": "pogo-hops", "prescription": { "sets": 1, "durationSeconds": 40 } }
+        ]
+      },
+      {
+        "id": "finisher", "title": "Finisher", "format": "circuit", "estimatedMinutes": 8,
+        "rounds": 3, "transitionSeconds": 20, "roundRestSeconds": 40,
+        "items": [
+          { "id": "cb-bike-sprint", "exercise": "air-bike", "prescription": { "sets": 1, "durationSeconds": 30, "note": "hard" } },
+          { "id": "cb-dead-bug", "exercise": "dead-bug", "prescription": { "sets": 1, "durationSeconds": 40 } }
+        ]
+      }
+    ]
+  }
+]

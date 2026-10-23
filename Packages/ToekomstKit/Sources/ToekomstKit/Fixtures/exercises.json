@@ -1,0 +1,135 @@
+[
+  {
+    "id": "air-bike", "name": "Air bike", "code": "CD", "loadKind": "cardio", "isCoreLift": false,
+    "muscles": [],
+    "cues": ["Push and pull with the arms", "Steady cadence you could talk at"]
+  },
+  {
+    "id": "row-erg", "name": "Row erg", "code": "CD", "loadKind": "cardio", "isCoreLift": false,
+    "muscles": [],
+    "cues": ["Legs, then hips, then arms", "Arms, hips, legs on the way back"]
+  },
+  {
+    "id": "goblet-squat", "name": "Goblet squat", "code": "SQ", "loadKind": "dumbbell", "isCoreLift": false,
+    "muscles": ["quads"],
+    "cues": ["Hold the bell at your chest", "Elbows inside the knees at the bottom", "Stand up tall between reps"]
+  },
+  {
+    "id": "back-squat", "name": "Back squat", "code": "SQ", "loadKind": "barbell", "isCoreLift": true,
+    "muscles": ["quads", "hamsGlutes"],
+    "cues": ["Brace before you unrack", "Bar stays over mid-foot", "Knees track over toes", "Hips and chest rise together"],
+    "demo": "back-squat", "demoAngles": ["side", "front"]
+  },
+  {
+    "id": "romanian-deadlift", "name": "Romanian deadlift", "shortName": "Romanian DL", "code": "HG", "loadKind": "barbell", "isCoreLift": true,
+    "muscles": ["hamsGlutes"],
+    "cues": ["Soft knees, push the hips back", "Bar drags down the thighs", "Stop when the hamstrings stop stretching"]
+  },
+  {
+    "id": "bulgarian-split-squat", "name": "Bulgarian split squat", "code": "LG", "loadKind": "dumbbellPair", "isCoreLift": false,
+    "muscles": ["quads", "hamsGlutes"],
+    "cues": ["Rear foot laces-down on the bench", "Front shin stays near vertical", "Drop straight down"],
+    "demo": "split-squat", "demoAngles": ["side"]
+  },
+  {
+    "id": "lying-leg-curl", "name": "Lying leg curl", "code": "HG", "loadKind": "machine", "isCoreLift": false,
+    "muscles": ["hamsGlutes"],
+    "cues": ["Hips pinned to the pad", "Two seconds down"]
+  },
+  {
+    "id": "standing-calf-raise", "name": "Standing calf raise", "code": "CL", "loadKind": "machine", "isCoreLift": false,
+    "muscles": ["calves"],
+    "cues": ["Full stretch at the bottom", "Pause one second at the top"]
+  },
+  {
+    "id": "hanging-knee-raise", "name": "Hanging knee raise", "code": "CR", "loadKind": "bodyweight", "isCoreLift": false,
+    "muscles": ["core"],
+    "cues": ["Curl the pelvis up, not just the knees", "No swinging"]
+  },
+  {
+    "id": "band-pull-apart", "name": "Band pull-apart", "code": "BA", "loadKind": "bodyweight", "isCoreLift": false,
+    "muscles": [],
+    "cues": ["Arms straight", "Squeeze the shoulder blades together"]
+  },
+  {
+    "id": "bench-press", "name": "Bench press", "code": "BP", "loadKind": "barbell", "isCoreLift": true,
+    "muscles": ["chest"],
+    "cues": ["Shoulder blades back and down", "Touch the lower chest", "Feet planted, drive through the floor"]
+  },
+  {
+    "id": "barbell-row", "name": "Barbell row", "code": "RW", "loadKind": "barbell", "isCoreLift": true,
+    "muscles": ["back"],
+    "cues": ["Hinge to about 45 degrees", "Pull to the belly button", "Don't stand up to finish the rep"]
+  },
+  {
+    "id": "incline-db-press", "name": "Incline dumbbell press", "code": "IP", "loadKind": "dumbbellPair", "isCoreLift": false,
+    "muscles": ["chest", "shoulders"],
+    "cues": ["Bench at 30 degrees", "Elbows about 45 degrees from the body"]
+  },
+  {
+    "id": "lat-pulldown", "name": "Lat pulldown", "code": "PD", "loadKind": "cable", "isCoreLift": false,
+    "muscles": ["back"],
+    "cues": ["Pull the elbows to the ribs", "Chest up to meet the bar"]
+  },
+  {
+    "id": "lateral-raise", "name": "Dumbbell lateral raise", "code": "LR", "loadKind": "dumbbellPair", "isCoreLift": false,
+    "muscles": ["shoulders"],
+    "cues": ["Lead with the elbows", "Stop at shoulder height"]
+  },
+  {
+    "id": "db-curl", "name": "Dumbbell curl", "code": "CU", "loadKind": "dumbbellPair", "isCoreLift": false,
+    "muscles": ["arms"],
+    "cues": ["Elbows stay by your sides", "Lower under control"]
+  },
+  {
+    "id": "cable-pushdown", "name": "Cable pushdown", "code": "TR", "loadKind": "cable", "isCoreLift": false,
+    "muscles": ["arms"],
+    "cues": ["Elbows pinned", "Full lockout"]
+  },
+  {
+    "id": "pallof-press", "name": "Pallof press", "code": "CR", "loadKind": "cable", "isCoreLift": false,
+    "muscles": ["core"],
+    "cues": ["Resist the rotation", "Press straight out from the sternum"]
+  },
+  {
+    "id": "db-row", "name": "One-arm dumbbell row", "code": "RW", "loadKind": "dumbbell", "isCoreLift": false,
+    "muscles": ["back"],
+    "cues": ["Flat back", "Pull the elbow past the ribs"]
+  },
+  {
+    "id": "db-push-press", "name": "Dumbbell push press", "code": "PP", "loadKind": "dumbbellPair", "isCoreLift": false,
+    "muscles": ["shoulders"],
+    "cues": ["Short dip, then drive", "Finish with biceps by the ears"]
+  },
+  {
+    "id": "push-up", "name": "Push-up", "code": "PU", "loadKind": "bodyweight", "isCoreLift": false,
+    "muscles": ["chest", "arms"],
+    "cues": ["Body in one straight line", "Chest to a fist's height off the floor"]
+  },
+  {
+    "id": "dead-bug", "name": "Dead bug", "code": "CR", "loadKind": "bodyweight", "isCoreLift": false,
+    "muscles": ["core"],
+    "cues": ["Low back pressed into the floor", "Breathe out as the leg reaches"]
+  },
+  {
+    "id": "db-thruster", "name": "Dumbbell thruster", "code": "TH", "loadKind": "dumbbellPair", "isCoreLift": false,
+    "muscles": ["quads", "shoulders"],
+    "cues": ["Squat to depth", "Use the drive out of the hole to press"]
+  },
+  {
+    "id": "single-leg-rdl", "name": "Single-leg RDL", "code": "HG", "loadKind": "dumbbell", "isCoreLift": false,
+    "muscles": ["hamsGlutes"],
+    "cues": ["Hips square to the floor", "Reach the back heel away"]
+  },
+  {
+    "id": "kettlebell-swing", "name": "Kettlebell swing", "code": "KB", "loadKind": "kettlebell", "isCoreLift": false,
+    "muscles": ["hamsGlutes"],
+    "cues": ["Hike the bell back high between the legs", "Snap the hips, arms just guide", "Bell floats to chest height"],
+    "demo": "kettlebell-swing", "demoAngles": ["side"]
+  },
+  {
+    "id": "pogo-hops", "name": "Pogo hops", "code": "CL", "loadKind": "bodyweight", "isCoreLift": false,
+    "muscles": ["calves"],
+    "cues": ["Stiff ankles, quick contacts", "Stay on the balls of the feet"]
+  }
+]

@@ -1,0 +1,9 @@
+[
+  { "date": "2026-10-03", "templateId": "conditioning-b", "status": "missed" },
+  { "date": "2026-10-12", "templateId": "conditioning-a", "status": "completed", "actualMinutes": 33 },
+  { "date": "2026-10-13", "templateId": "upper-mass", "status": "completed", "actualMinutes": 63 },
+  { "date": "2026-10-15", "templateId": "lower-mass", "status": "completed", "actualMinutes": 57 },
+  { "date": "2026-10-17", "templateId": "conditioning-b", "status": "completed", "actualMinutes": 36 },
+  { "date": "2026-10-19", "templateId": "conditioning-a", "status": "completed", "actualMinutes": 34 },
+  { "date": "2026-10-20", "templateId": "upper-mass", "status": "completed", "actualMinutes": 61 }
+]
