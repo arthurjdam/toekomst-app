@@ -4,6 +4,7 @@ import ToekomstKit
 /// Rest between sets of the same exercise: a segmented ring counting down.
 struct RestScreen: View {
     @Bindable var model: WorkoutPlayerModel
+    let stage: Namespace.ID
     @Environment(\.theme) private var theme
 
     var body: some View {
@@ -92,12 +93,17 @@ struct RestScreen: View {
 
     private func upNext(_ item: PlannedExercise, step: WorkoutStep) -> some View {
         Button {
-            model.endRest()
+            withAnimation(Motion.stage) { model.endRest() }
         } label: {
             HStack(spacing: 12) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Up next · set \(step.setNumber) of \(model.engine.setCount(for: step))").textStyle(.label).foregroundStyle(Palette.ink2)
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(spacing: 8) {
+                        SetBoxes(total: model.engine.setCount(for: step), done: step.setNumber - 1)
+                            .stage(.sets, in: stage)
+                        Text("Up next · set \(step.setNumber) of \(model.engine.setCount(for: step))").textStyle(.label).foregroundStyle(Palette.ink2)
+                    }
                     Text(item.exercise.name).textStyle(.titleM).foregroundStyle(Palette.ink)
+                        .stage(.title, in: stage)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 HStack(alignment: .firstTextBaseline, spacing: 6) {
@@ -109,9 +115,11 @@ struct RestScreen: View {
                         Text("reps").textStyle(.readout).foregroundStyle(Palette.ink2)
                     }
                 }
+                .stage(.metric, in: stage)
             }
             .padding(16)
             .background(Palette.surface1, in: RoundedRectangle(cornerRadius: 20))
+            .stage(.card, in: stage)
         }
         .buttonStyle(PressableStyle())
         .accessibilityHint("Ends rest and opens the set")
@@ -132,7 +140,7 @@ struct RestScreen: View {
                     .accessibilityLabel("15 seconds more")
             }
             Button {
-                model.endRest()
+                withAnimation(Motion.stage) { model.endRest() }
             } label: {
                 HStack(spacing: 10) {
                     Text(model.isOvertime ? "Start set \(nextSet)" : "Skip rest · set \(nextSet)")
@@ -141,6 +149,7 @@ struct RestScreen: View {
                 }
             }
             .buttonStyle(PrimaryButtonStyle())
+            .stage(.primary, in: stage)
         }
     }
 

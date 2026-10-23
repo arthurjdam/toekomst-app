@@ -17,6 +17,11 @@ enum Motion {
     static let page = Animation.timingCurve(0.2, 0, 0, 1, duration: 0.3)
     /// Once-a-second countdown visuals.
     static let tick = Animation.linear(duration: 0.25)
+    /// One workout screen morphing into the next. Long enough to follow the
+    /// card, title and numbers to their new places.
+    static let stage = Animation.timingCurve(0.2, 0, 0, 1, duration: 0.45)
+    /// Each step of the session progress bar (fill, then collapse and expand).
+    static let progress = Animation.timingCurve(0.2, 0, 0, 1, duration: 0.4)
     /// How far a page travels as it fades in or out.
     static let pageOffset: CGFloat = 32
 }
@@ -30,6 +35,43 @@ extension AnyTransition {
             insertion: .offset(x: distance).combined(with: .opacity),
             removal: .offset(x: -distance).combined(with: .opacity)
         )
+    }
+}
+
+/// Elements that carry over between workout screens. Each screen tags its
+/// version of an element; when the screen changes, the element morphs (flat)
+/// from its old frame to its new one instead of the page being swapped.
+enum StageElement: Hashable {
+    /// The exercise card: demo on the exercise screen, "up next" on rest and transition.
+    case card
+    /// The exercise name.
+    case title
+    /// The working weight (or time).
+    case metric
+    /// The set boxes and counter.
+    case sets
+    /// The main button at the bottom.
+    case primary
+}
+
+private struct StageModifier: ViewModifier {
+    let element: StageElement
+    let namespace: Namespace.ID
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    func body(content: Content) -> some View {
+        if reduceMotion {
+            // Cards travelling across the screen is a lot of motion; just cross-fade.
+            content
+        } else {
+            content.matchedGeometryEffect(id: element, in: namespace)
+        }
+    }
+}
+
+extension View {
+    func stage(_ element: StageElement, in namespace: Namespace.ID) -> some View {
+        modifier(StageModifier(element: element, namespace: namespace))
     }
 }
 

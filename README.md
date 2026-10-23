@@ -99,15 +99,22 @@ Motion follows two rules (`Toekomst/DesignSystem/Motion.swift`):
 
 - **Flat** for anything that can interpolate: pages, tabs, progress bars,
   selection highlights, chart data and bar lengths slide, fade, resize or
-  recolor on one ease-out curve with no springs, scaling or blur. The workout
-  progress bar keeps a single view per exercise, so finishing a set or an
-  exercise collapses and widens its slots instead of redrawing the bar.
+  recolor on one ease-out curve with no springs, scaling or blur.
+- **Workout screens morph** rather than swap: the exercise card, its name,
+  the weight, the set boxes and the main button are shared elements, so
+  logging a set shrinks the exercise card into the rest screen's "up next"
+  card and the name and weight travel with it. A logged set is applied once
+  the log sheet has closed, so this happens in view.
+- **Progress bar** in two steps: the set's tick fills left to right, then a
+  finished exercise collapses to a square while the next one opens into its
+  set ticks.
 - **Glitch** for content that swaps rather than moves: labels, numbers,
   status text and demo figures jump sideways in hard steps with a signal
   scan line (about 0.2 s), then settle. Countdown digits tick without
   animation, like a clock.
 
-With Reduce Motion on, page slides become fades and glitches are skipped.
+With Reduce Motion on, page slides and workout morphs become fades and
+glitches are skipped.
 
 Additions beyond the designed screens:
 

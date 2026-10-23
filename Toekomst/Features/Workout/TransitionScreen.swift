@@ -5,6 +5,7 @@ import ToekomstKit
 /// keeps running in the footer.
 struct TransitionScreen: View {
     @Bindable var model: WorkoutPlayerModel
+    let stage: Namespace.ID
 
     var body: some View {
         VStack(spacing: 0) {
@@ -78,17 +79,22 @@ struct TransitionScreen: View {
                 HStack(alignment: .bottom) {
                     Text(item.exercise.name).textStyle(.titleM).foregroundStyle(Palette.ink)
                         .accessibilityAddTraits(.isHeader)
+                        .stage(.title, in: stage)
                     Spacer()
-                    Text("\(model.engine.setCount(for: step)) sets").textStyle(.label).foregroundStyle(Palette.ink2)
+                    HStack(spacing: 8) {
+                        SetBoxes(total: model.engine.setCount(for: step), done: 0)
+                            .stage(.sets, in: stage)
+                        Text("\(model.engine.setCount(for: step)) sets").textStyle(.label).foregroundStyle(Palette.ink2)
+                    }
                 }
                 HStack(spacing: 8) {
                     if let load = model.engine.targetLoad(for: step) {
-                        tile(label: item.exercise.loadKind == .dumbbellPair ? "Each hand" : "Weight", value: Format.weight(load), unit: "lb")
+                        tile(label: item.exercise.loadKind == .dumbbellPair ? "Each hand" : "Weight", value: Format.weight(load), unit: "lb", isMetric: true)
                     }
                     if let reps = item.prescription.reps {
                         tile(label: reps.isPerSide ? "Reps / side" : "Reps", value: reps.rangeDisplay, unit: nil)
                     } else if let duration = item.prescription.durationSeconds {
-                        tile(label: "Time", value: Format.clock(duration), unit: nil)
+                        tile(label: "Time", value: Format.clock(duration), unit: nil, isMetric: true)
                     }
                 }
                 if item.isGoingUp, let reason = item.progression?.reason {
@@ -105,14 +111,21 @@ struct TransitionScreen: View {
         }
         .background(Palette.surface1)
         .clipShape(RoundedRectangle(cornerRadius: 20))
+        .stage(.card, in: stage)
     }
 
-    private func tile(label: String, value: String, unit: String?) -> some View {
+    @ViewBuilder
+    private func tile(label: String, value: String, unit: String?, isMetric: Bool = false) -> some View {
+        let number = HStack(alignment: .firstTextBaseline, spacing: 6) {
+            Text(value).textStyle(.metricM).foregroundStyle(Palette.ink)
+            if let unit { Text(unit).textStyle(.readout).foregroundStyle(Palette.ink2) }
+        }
         VStack(alignment: .leading, spacing: 4) {
             Text(label).textStyle(.label).foregroundStyle(Palette.ink2)
-            HStack(alignment: .firstTextBaseline, spacing: 6) {
-                Text(value).textStyle(.metricM).foregroundStyle(Palette.ink)
-                if let unit { Text(unit).textStyle(.readout).foregroundStyle(Palette.ink2) }
+            if isMetric {
+                number.stage(.metric, in: stage)
+            } else {
+                number
             }
         }
         .padding(12)
@@ -154,8 +167,9 @@ struct TransitionScreen: View {
                     .textStyle(.readout).textCase(.uppercase).foregroundStyle(Palette.ink)
             }
             .accessibilityElement(children: .combine)
-            Button("I'm ready") { model.endRest() }
+            Button("I'm ready") { withAnimation(Motion.stage) { model.endRest() } }
                 .buttonStyle(PrimaryButtonStyle())
+                .stage(.primary, in: stage)
         }
     }
 }

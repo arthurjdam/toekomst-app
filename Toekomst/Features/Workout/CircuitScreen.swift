@@ -5,6 +5,7 @@ import ToekomstKit
 /// Between moves the same screen counts down the short rest.
 struct CircuitScreen: View {
     @Bindable var model: WorkoutPlayerModel
+    let stage: Namespace.ID
     @Environment(\.theme) private var theme
 
     private var resting: Bool { model.circuitPhase == .rest }
@@ -29,6 +30,7 @@ struct CircuitScreen: View {
                                 .padding(12)
                                 .accessibilityLabel("Exercise info and form cues")
                         }
+                        .stage(.card, in: stage)
                         .layoutPriority(-1)
 
                     HStack {
@@ -38,6 +40,7 @@ struct CircuitScreen: View {
                             }
                             Text(item.exercise.name).textStyle(.titleM).foregroundStyle(Palette.ink)
                                 .accessibilityAddTraits(.isHeader)
+                                .stage(.title, in: stage)
                                 .glitch(on: item.id)
                         }
                         Spacer()
@@ -192,7 +195,7 @@ struct CircuitScreen: View {
     private func footer(_ item: PlannedExercise) -> some View {
         if resting {
             Button {
-                model.endRest()
+                withAnimation(Motion.stage) { model.endRest() }
             } label: {
                 HStack(spacing: 8) {
                     Text("Skip rest")
@@ -200,10 +203,11 @@ struct CircuitScreen: View {
                 }
             }
             .buttonStyle(OutlineButtonStyle())
+            .stage(.primary, in: stage)
         } else if item.prescription.durationSeconds == nil {
             VStack(spacing: 8) {
                 Button {
-                    model.completeAsPlanned()
+                    withAnimation(Motion.stage) { model.completeAsPlanned() }
                 } label: {
                     HStack(spacing: 10) {
                         Glyph(.check, size: 20, weight: 2.25)
@@ -211,12 +215,13 @@ struct CircuitScreen: View {
                     }
                 }
                 .buttonStyle(PrimaryButtonStyle())
-                Button("Skip move") { model.skipCurrent() }
+                .stage(.primary, in: stage)
+                Button("Skip move") { withAnimation(Motion.stage) { model.skipCurrent() } }
                     .buttonStyle(QuietButtonStyle())
             }
         } else {
             Button {
-                model.skipCurrent()
+                withAnimation(Motion.stage) { model.skipCurrent() }
             } label: {
                 HStack(spacing: 8) {
                     Text("Skip move")
@@ -224,6 +229,7 @@ struct CircuitScreen: View {
                 }
             }
             .buttonStyle(OutlineButtonStyle())
+            .stage(.primary, in: stage)
         }
     }
 }

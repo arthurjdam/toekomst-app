@@ -4,6 +4,7 @@ import ToekomstKit
 /// One set of a straight-set exercise: demo, target and "Done set".
 struct ExerciseScreen: View {
     @Bindable var model: WorkoutPlayerModel
+    let stage: Namespace.ID
     @State private var angle = "side"
 
     var body: some View {
@@ -70,6 +71,7 @@ struct ExerciseScreen: View {
                         .padding(.horizontal, 16).padding(.bottom, 14)
                 }
             }
+            .stage(.card, in: stage)
             .layoutPriority(-1)
     }
 
@@ -80,6 +82,7 @@ struct ExerciseScreen: View {
                 Text(item.exercise.name).textStyle(.titleM).foregroundStyle(Palette.ink)
                     .lineLimit(2)
                     .accessibilityAddTraits(.isHeader)
+                    .stage(.title, in: stage)
                 if item.exercise.isCoreLift {
                     Badge(text: "Core", style: .outline, foreground: Palette.ink2)
                 }
@@ -89,6 +92,7 @@ struct ExerciseScreen: View {
                 SetBoxes(total: total, done: step.setNumber - 1)
                 Text("Set \(step.setNumber)/\(total)").textStyle(.label).foregroundStyle(Palette.ink)
             }
+            .stage(.sets, in: stage)
             .accessibilityElement(children: .ignore)
             .accessibilityLabel("Set \(step.setNumber) of \(total)")
         }
@@ -104,6 +108,7 @@ struct ExerciseScreen: View {
                         .glitch(on: model.timedSetRunning)
                     Text(Format.clock(model.timedSetRunning ? max(0, model.remainingSeconds) : duration))
                         .textStyle(.metricXL).foregroundStyle(Palette.ink)
+                        .stage(.metric, in: stage)
                 }
                 Spacer()
                 if let note = prescription.note {
@@ -123,6 +128,7 @@ struct ExerciseScreen: View {
                                 .minimumScaleFactor(0.6).lineLimit(1)
                             Text("lb").textStyle(.readout).foregroundStyle(Palette.ink2)
                         }
+                        .stage(.metric, in: stage)
                     }
                     .accessibilityElement(children: .combine)
                     Spacer()
@@ -183,7 +189,7 @@ struct ExerciseScreen: View {
     private func footer(_ item: PlannedExercise) -> some View {
         if item.prescription.isTimed && !model.timedSetRunning {
             Button {
-                model.startTimedSet()
+                withAnimation(Motion.flat) { model.startTimedSet() }
             } label: {
                 HStack(spacing: 10) {
                     Glyph(.play, size: 20)
@@ -191,9 +197,10 @@ struct ExerciseScreen: View {
                 }
             }
             .buttonStyle(PrimaryButtonStyle())
+            .stage(.primary, in: stage)
         } else {
             Button {
-                model.doneSet()
+                withAnimation(Motion.stage) { model.doneSet() }
             } label: {
                 HStack(spacing: 10) {
                     Glyph(.check, size: 20, weight: 2.25)
@@ -201,6 +208,7 @@ struct ExerciseScreen: View {
                 }
             }
             .buttonStyle(PrimaryButtonStyle())
+            .stage(.primary, in: stage)
         }
     }
 }
