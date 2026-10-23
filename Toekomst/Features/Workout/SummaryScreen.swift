@@ -201,7 +201,7 @@ struct SummaryScreen: View {
                         .padding(.vertical, 8)
                 } else {
                     Button {
-                        addingNote = true
+                        withAnimation(Motion.flat) { addingNote = true }
                         noteFocused = true
                     } label: {
                         HStack(spacing: 10) {

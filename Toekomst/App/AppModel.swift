@@ -13,6 +13,8 @@ enum AppTab: Hashable, CaseIterable {
         }
     }
 
+    var index: Int { Self.allCases.firstIndex(of: self) ?? 0 }
+
     var glyph: GlyphKind {
         switch self {
         case .today: return .tabToday
@@ -65,7 +67,8 @@ final class AppModel {
 
     func loadToday() async {
         do {
-            today = .loaded(try await repository.today())
+            let loaded = try await repository.today()
+            withAnimation(Motion.flat) { today = .loaded(loaded) }
         } catch {
             today = .failed(error.localizedDescription)
         }

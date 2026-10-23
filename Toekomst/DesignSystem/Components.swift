@@ -189,19 +189,27 @@ struct SegmentedControl<Value: Hashable>: View {
     @Binding var selection: Value
     var height: CGFloat = 36
     var accessibilityLabel: String
+    @Namespace private var highlight
 
     var body: some View {
         HStack(spacing: 4) {
             ForEach(options, id: \.value) { option in
                 let selected = option.value == selection
                 Button {
-                    selection = option.value
+                    withAnimation(Motion.flat) { selection = option.value }
                 } label: {
                     Text(option.label)
                         .textStyle(.action)
                         .foregroundStyle(selected ? Palette.ink : Palette.ink2)
                         .frame(maxWidth: .infinity, minHeight: height)
-                        .background(selected ? Palette.surface3 : .clear, in: RoundedRectangle(cornerRadius: 9))
+                        .background {
+                            // One highlight that slides between options.
+                            if selected {
+                                RoundedRectangle(cornerRadius: 9)
+                                    .fill(Palette.surface3)
+                                    .matchedGeometryEffect(id: "highlight", in: highlight)
+                            }
+                        }
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
@@ -240,6 +248,7 @@ struct ChoiceGrid<Value: Hashable>: View {
                 .accessibilityAddTraits(selected ? .isSelected : [])
             }
         }
+        .animation(Motion.flat, value: selection)
     }
 }
 

@@ -95,13 +95,14 @@ struct ReadinessSheet: View {
                 Badge(text: hold ? "= Hold" : "▲ Go", style: hold ? .neutral : .signalDim)
                 Text(hold ? "Holding loads today" : "Going for it").textStyle(.titleM).foregroundStyle(Palette.ink)
             }
+            .glitch(on: hold)
             Text(reason).textStyle(.footnote).foregroundStyle(Palette.ink2)
+                .glitch(on: reason)
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Palette.surface2, in: RoundedRectangle(cornerRadius: 12))
         .accessibilityElement(children: .combine)
-        .animation(.snappy, value: hold)
     }
 
     private var reason: String {

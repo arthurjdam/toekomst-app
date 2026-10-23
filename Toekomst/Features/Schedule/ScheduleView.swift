@@ -6,6 +6,9 @@ struct ScheduleView: View {
     @State private var weekStart: LocalDate?
     @State private var bounds: ClosedRange<LocalDate>?
     @State private var state: LoadState<WeekSchedule> = .loading
+    /// Direction of the last week change, so pages slide the way the arrows point.
+    @State private var forward = true
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var today: LocalDate? { model.today.value?.date }
 
@@ -13,15 +16,17 @@ struct ScheduleView: View {
         Group {
             switch state {
             case .loading:
-                LoadingView()
+                LoadingView().transition(.opacity)
             case .failed(let message):
                 LoadingView(message: message) { Task { await load() } }
+                    .transition(.opacity)
             case .loaded(let week):
-                content(week)
+                content(week).transition(.opacity)
             }
         }
         .background(Palette.bg)
         .toolbar(.hidden, for: .navigationBar)
+        .animation(Motion.flat, value: state.phase)
         .task(id: TaskKey(week: weekStart, version: model.dataVersion, today: today)) { await load() }
     }
 
@@ -38,7 +43,7 @@ struct ScheduleView: View {
                 bounds = try await model.repository.scheduleBounds()
             }
             let week = try await model.repository.week(starting: weekStart ?? today.startOfWeek)
-            state = .loaded(week)
+            withAnimation(Motion.page) { state = .loaded(week) }
         } catch {
             state = .failed(error.localizedDescription)
         }
@@ -47,13 +52,18 @@ struct ScheduleView: View {
     private func content(_ week: WeekSchedule) -> some View {
         ScreenScroll {
             header(week)
-            daysCard(week)
-            VStack(spacing: 8) {
-                ForEach(week.days) { day in
-                    DayRow(day: day, today: today ?? day.date)
+            VStack(alignment: .leading, spacing: 24) {
+                daysCard(week)
+                VStack(spacing: 8) {
+                    ForEach(week.days) { day in
+                        DayRow(day: day, today: today ?? day.date)
+                    }
                 }
+                MuscleCoverageCard(coverage: week.coverage, note: week.coverageNote)
             }
-            MuscleCoverageCard(coverage: week.coverage, note: week.coverageNote)
+            // A new week is a new page; changes within a week animate in place.
+            .id(week.weekStart)
+            .transition(.flatPush(forward: forward, reduceMotion: reduceMotion))
         }
         .refreshable { await load() }
     }
@@ -63,8 +73,10 @@ struct ScheduleView: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Block \(week.block.blockNumber) · Week \(week.block.week) of \(week.block.weeksInBlock)")
                     .textStyle(.label).foregroundStyle(Palette.ink2)
+                    .glitch(on: week.block)
                 Text(Format.weekRange(week.weekStart)).textStyle(.titleL).foregroundStyle(Palette.ink)
                     .accessibilityAddTraits(.isHeader)
+                    .glitch(on: week.weekStart)
             }
             Spacer()
             HStack(spacing: 8) {
@@ -88,6 +100,7 @@ struct ScheduleView: View {
     }
 
     private func step(_ week: WeekSchedule, by weeks: Int) {
+        forward = weeks > 0
         weekStart = week.weekStart.adding(days: 7 * weeks)
     }
 
@@ -104,6 +117,7 @@ struct ScheduleView: View {
                 Text("Training days this week").textStyle(.label).foregroundStyle(Palette.ink2)
                 Text(week.trainingDays.map(\.shortName).joined(separator: " · "))
                     .textStyle(.headline).foregroundStyle(Palette.ink)
+                    .glitch(on: week.trainingDays)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             if let target {
@@ -164,7 +178,7 @@ private struct DayRow: View {
             HStack {
                 KindBadge(kind: session.kind)
                 Spacer()
-                status(session)
+                status(session).glitch(on: session.status)
             }
             Text(session.title).textStyle(.headline).foregroundStyle(Palette.ink)
         }

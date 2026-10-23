@@ -9,10 +9,6 @@ struct ExerciseScreen: View {
     var body: some View {
         if let step = model.currentStep, let item = model.currentItem {
             VStack(spacing: 0) {
-                WorkoutHeader(model: model)
-                    .padding(.horizontal, 20)
-                    .padding(.top, 4)
-
                 VStack(spacing: 16) {
                     figure(item)
                     titleRow(item, step: step)
@@ -28,6 +24,7 @@ struct ExerciseScreen: View {
                     .padding(.top, 12)
                     .padding(.bottom, 8)
             }
+            .animation(Motion.flat, value: model.timedSetRunning)
             .onChange(of: item.id, initial: true) { _, _ in
                 angle = item.exercise.demoAngles?.first ?? "side"
             }
@@ -36,6 +33,7 @@ struct ExerciseScreen: View {
 
     private func figure(_ item: PlannedExercise) -> some View {
         DemoFigure(demo: item.exercise.demo, angle: angle, code: item.exercise.code)
+            .glitch(on: angle)
             .frame(minHeight: 150, maxHeight: 272)
             .background(Palette.surface1)
             .clipShape(RoundedRectangle(cornerRadius: 20))
@@ -43,7 +41,7 @@ struct ExerciseScreen: View {
                 if let angles = item.exercise.demoAngles, angles.count > 1 {
                     HStack(spacing: 2) {
                         ForEach(angles, id: \.self) { option in
-                            Button(option.capitalized) { angle = option }
+                            Button(option.capitalized) { withAnimation(Motion.flat) { angle = option } }
                                 .buttonStyle(.plain)
                                 .textStyle(.label)
                                 .foregroundStyle(angle == option ? Palette.ink : Palette.ink2)
@@ -103,9 +101,9 @@ struct ExerciseScreen: View {
             HStack(alignment: .bottom) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(model.timedSetRunning ? "Time left" : "Time").textStyle(.label).foregroundStyle(Palette.ink2)
+                        .glitch(on: model.timedSetRunning)
                     Text(Format.clock(model.timedSetRunning ? max(0, model.remainingSeconds) : duration))
                         .textStyle(.metricXL).foregroundStyle(Palette.ink)
-                        .contentTransition(.numericText(countsDown: true))
                 }
                 Spacer()
                 if let note = prescription.note {

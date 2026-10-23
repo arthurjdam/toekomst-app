@@ -8,10 +8,6 @@ struct RestScreen: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            WorkoutHeader(model: model)
-                .padding(.horizontal, 20)
-                .padding(.top, 4)
-
             VStack(spacing: 20) {
                 if let logged = model.lastLogged {
                     loggedChip(logged)
@@ -73,15 +69,15 @@ struct RestScreen: View {
                 .trim(from: 0, to: fraction)
                 .stroke(theme.signal, style: style)
                 .rotationEffect(.degrees(-90))
-                .animation(.linear(duration: 1), value: fraction)
+                .animation(Motion.tick, value: fraction)
             VStack(spacing: 6) {
                 Text(label).textStyle(.label).foregroundStyle(model.isOvertime ? Palette.negative : Palette.ink2)
+                    .glitch(on: label)
                 Text((model.isOvertime ? "+" : "") + Format.clock(remaining))
                     .textStyle(.timer)
                     .foregroundStyle(model.isOvertime ? Palette.ink2 : Palette.ink)
                     .minimumScaleFactor(0.5)
                     .lineLimit(1)
-                    .contentTransition(.numericText(countsDown: !model.isOvertime))
                 Text("of \(Format.clock(model.phaseDuration))").textStyle(.readout).foregroundStyle(Palette.ink3)
             }
             .padding(40)
@@ -125,6 +121,7 @@ struct RestScreen: View {
         let nextSet = model.currentStep?.setNumber ?? 0
         return VStack(spacing: 8) {
             Text(hint(nextSet: nextSet)).textStyle(.label).foregroundStyle(Palette.ink3)
+                .glitch(on: model.isOvertime)
                 .padding(.bottom, 4)
             HStack(spacing: 8) {
                 Button("-15s") { model.adjustRest(by: -15) }
@@ -139,6 +136,7 @@ struct RestScreen: View {
             } label: {
                 HStack(spacing: 10) {
                     Text(model.isOvertime ? "Start set \(nextSet)" : "Skip rest · set \(nextSet)")
+                        .glitch(on: model.isOvertime)
                     Glyph(.skip, size: 18, weight: 2.25)
                 }
             }

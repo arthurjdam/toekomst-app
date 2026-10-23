@@ -7,20 +7,37 @@ struct WorkoutPlayerView: View {
     @Bindable var model: WorkoutPlayerModel
     @Environment(AppModel.self) private var app
     @Environment(\.theme) private var theme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    /// Exercise, rest and up next share one header so its progress bar can
+    /// animate from state to state while the page below changes.
+    private var showsHeader: Bool {
+        [.exercise, .rest, .transition].contains(model.screen)
+    }
 
     var body: some View {
-        ZStack {
-            Palette.bg.ignoresSafeArea()
-            switch model.screen {
-            case .exercise: ExerciseScreen(model: model)
-            case .rest: RestScreen(model: model)
-            case .transition: TransitionScreen(model: model)
-            case .circuit: CircuitScreen(model: model)
-            case .finishing: finishing
-            case .summary: SummaryScreen(model: model) { app.activeWorkout = nil }
+        VStack(spacing: 0) {
+            if showsHeader {
+                WorkoutHeader(model: model)
+                    .padding(.horizontal, 20)
+                    .padding(.top, 4)
+                    .transition(.opacity)
             }
+            ZStack {
+                let page = AnyTransition.flatPush(reduceMotion: reduceMotion)
+                switch model.screen {
+                case .exercise: ExerciseScreen(model: model).transition(page)
+                case .rest: RestScreen(model: model).transition(page)
+                case .transition: TransitionScreen(model: model).transition(page)
+                case .circuit: CircuitScreen(model: model).transition(page)
+                case .finishing: finishing.transition(.opacity)
+                case .summary: SummaryScreen(model: model) { app.activeWorkout = nil }.transition(page)
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .animation(.easeInOut(duration: 0.2), value: model.screen)
+        .background(Palette.bg)
+        .animation(Motion.page, value: model.screen)
         .sheet(isPresented: $model.showReadiness) {
             ReadinessSheet(session: model.session) { answers in
                 model.begin(with: answers)
@@ -100,8 +117,10 @@ struct WorkoutHeader: View {
             SessionProgressBar(engine: model.engine)
             HStack {
                 if let step = model.currentStep {
-                    Text("Exercise \(model.engine.exerciseNumber(of: step)) of \(model.engine.exerciseCount) · \(model.engine.group(of: step).title)")
+                    let label = "Exercise \(model.engine.exerciseNumber(of: step)) of \(model.engine.exerciseCount) · \(model.engine.group(of: step).title)"
+                    Text(label)
                         .textStyle(.label).foregroundStyle(Palette.ink2)
+                        .glitch(on: label)
                 }
                 Spacer()
                 WorkoutControls(model: model)
@@ -123,6 +142,7 @@ struct WorkoutControls: View {
                 .foregroundStyle(Palette.ink)
                 .padding(.horizontal, 10)
                 .frame(minHeight: 44)
+                .glitch(on: model.showElapsed)
                 .accessibilityHint("Switches between time left and time elapsed")
             Button { model.pause() } label: { Glyph(.pause, size: 20) }
                 .buttonStyle(IconButtonStyle())
@@ -131,48 +151,82 @@ struct WorkoutControls: View {
     }
 }
 
-/// Exercises as squares, grouped; the current exercise expands into one tick per set.
+/// Exercises as squares, grouped; the current exercise expands into one tick
+/// per set. Every exercise keeps the same view as the workout moves on, so
+/// widths and colors interpolate flat instead of the bar being redrawn.
 struct SessionProgressBar: View {
     let engine: WorkoutEngine
-    @Environment(\.theme) private var theme
 
     var body: some View {
         let groups = engine.progress()
         HStack(spacing: 12) {
-            ForEach(Array(groups.enumerated()), id: \.offset) { _, items in
-                let hasCurrent = items.contains { if case .current = $0 { return true } else { return false } }
+            ForEach(Array(groups.enumerated()), id: \.offset) { groupIndex, items in
+                let hasCurrent = items.contains { $0.isCurrent }
                 HStack(spacing: 4) {
-                    ForEach(Array(items.enumerated()), id: \.offset) { _, item in
-                        switch item {
-                        case .done:
-                            RoundedRectangle(cornerRadius: 2).fill(Palette.ink2).frame(width: 8, height: 8)
-                        case .upcoming:
-                            RoundedRectangle(cornerRadius: 2).strokeBorder(Palette.lineStrong, lineWidth: 1).frame(width: 8, height: 8)
-                        case .current(let sets):
-                            HStack(spacing: 3) {
-                                ForEach(Array(sets.enumerated()), id: \.offset) { _, set in
-                                    RoundedRectangle(cornerRadius: 2).fill(color(for: set))
-                                }
-                            }
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 8)
-                        }
+                    ForEach(Array(items.enumerated()), id: \.offset) { itemIndex, item in
+                        ProgressSlot(
+                            state: item,
+                            setCount: engine.setCount(for: WorkoutStep(groupIndex: groupIndex, itemIndex: itemIndex, setNumber: 1))
+                        )
                     }
                 }
                 .frame(maxWidth: hasCurrent ? .infinity : nil)
             }
         }
         .frame(height: 10)
+        .animation(Motion.flat, value: engine.completedStepCount)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Session progress")
         .accessibilityValue("\(engine.completedStepCount) of \(engine.steps.count) sets done")
     }
+}
 
-    private func color(for set: SetProgress) -> Color {
-        switch set {
-        case .done: return theme.signal
-        case .current: return Palette.lineStrong
-        case .upcoming: return Palette.surface3
+/// One exercise in the progress bar: an 8-point square, or set ticks while current.
+private struct ProgressSlot: View {
+    let state: ExerciseProgress
+    let setCount: Int
+    @Environment(\.theme) private var theme
+
+    var body: some View {
+        let current = state.isCurrent
+        ZStack {
+            RoundedRectangle(cornerRadius: 2)
+                .fill(state == .done ? Palette.ink2 : Palette.ink2.opacity(0))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 2)
+                        .strokeBorder(Palette.lineStrong, lineWidth: 1)
+                        .opacity(state == .upcoming ? 1 : 0)
+                }
+                .opacity(current ? 0 : 1)
+            HStack(spacing: 3) {
+                ForEach(0..<setCount, id: \.self) { index in
+                    RoundedRectangle(cornerRadius: 2).fill(tickColor(index))
+                }
+            }
+            .opacity(current ? 1 : 0)
         }
+        .frame(width: current ? nil : 8, height: 8)
+        .frame(maxWidth: current ? .infinity : 8)
+        .clipped()
+    }
+
+    private func tickColor(_ index: Int) -> Color {
+        switch state {
+        case .done: return theme.signal
+        case .upcoming: return Palette.surface3
+        case .current(let sets):
+            switch sets.indices.contains(index) ? sets[index] : .upcoming {
+            case .done: return theme.signal
+            case .current: return Palette.lineStrong
+            case .upcoming: return Palette.surface3
+            }
+        }
+    }
+}
+
+private extension ExerciseProgress {
+    var isCurrent: Bool {
+        if case .current = self { return true }
+        return false
     }
 }

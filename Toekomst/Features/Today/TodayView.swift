@@ -6,27 +6,38 @@ struct TodayView: View {
     @State private var showCheckIn = false
 
     var body: some View {
-        switch model.today {
-        case .loading:
-            LoadingView().background(Palette.bg).toolbar(.hidden, for: .navigationBar)
-        case .failed(let message):
-            LoadingView(message: message) { Task { await model.loadToday() } }
-                .background(Palette.bg).toolbar(.hidden, for: .navigationBar)
-        case .loaded(let today):
-            ScreenScroll(spacing: 20) {
-                header(today)
-                if let session = today.session {
-                    SessionCard(session: session, actualMinutes: today.week.days.first { $0.date == today.date }?.session?.actualMinutes)
-                } else {
-                    RestDayCard(upNext: today.upNext)
-                }
-                WeekStrip(week: today.week, today: today.date)
-                links(today)
+        Group {
+            switch model.today {
+            case .loading:
+                LoadingView().transition(.opacity)
+            case .failed(let message):
+                LoadingView(message: message) { Task { await model.loadToday() } }
+                    .transition(.opacity)
+            case .loaded(let today):
+                content(today).transition(.opacity)
             }
-            .refreshable { await model.loadToday() }
-            .sheet(isPresented: $showCheckIn) {
-                CheckInSheet(checkIn: today.checkIn)
+        }
+        .background(Palette.bg)
+        .toolbar(.hidden, for: .navigationBar)
+        .animation(Motion.flat, value: model.today.phase)
+    }
+
+    private func content(_ today: TodayOverview) -> some View {
+        ScreenScroll(spacing: 20) {
+            header(today)
+            if let session = today.session {
+                SessionCard(session: session, actualMinutes: today.week.days.first { $0.date == today.date }?.session?.actualMinutes)
+                    .transition(.opacity)
+            } else {
+                RestDayCard(upNext: today.upNext)
+                    .transition(.opacity)
             }
+            WeekStrip(week: today.week, today: today.date)
+            links(today)
+        }
+        .refreshable { await model.loadToday() }
+        .sheet(isPresented: $showCheckIn) {
+            CheckInSheet(checkIn: today.checkIn)
         }
     }
 
@@ -99,6 +110,7 @@ private struct LinkRow: View {
                 Text(title).textStyle(.headline).foregroundStyle(Palette.ink)
                 if let subtitle {
                     Text(subtitle).textStyle(.callout).foregroundStyle(Palette.ink2)
+                        .glitch(on: subtitle)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -153,6 +165,7 @@ private struct SessionCard: View {
                     }
                     .frame(maxWidth: .infinity, minHeight: 64)
                     .background(Palette.surface2, in: RoundedRectangle(cornerRadius: 12))
+                    .transition(.opacity)
                 } else {
                     Button {
                         model.startWorkout(session)
@@ -163,6 +176,7 @@ private struct SessionCard: View {
                         }
                     }
                     .buttonStyle(PrimaryButtonStyle())
+                    .transition(.opacity)
                 }
             }
         }
@@ -250,6 +264,7 @@ struct WeekStrip: View {
     var body: some View {
         VStack(spacing: 8) {
             SectionHeader(title: "This week", detail: "\(week.completedCount) of \(week.sessions.count) done", detailColor: Palette.ink2)
+                .glitch(on: week.completedCount)
             HStack(spacing: 6) {
                 ForEach(week.days) { day in
                     VStack(spacing: 6) {

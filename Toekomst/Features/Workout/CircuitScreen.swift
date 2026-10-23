@@ -15,9 +15,11 @@ struct CircuitScreen: View {
                 header(step: step, group: group)
                     .padding(.horizontal, 20)
                     .padding(.top, 4)
+                    .animation(Motion.flat, value: step)
 
                 VStack(spacing: 16) {
                     DemoFigure(demo: item.exercise.demo, code: item.exercise.code)
+                        .glitch(on: item.id)
                         .frame(minHeight: 140, maxHeight: 208)
                         .background(Palette.surface1)
                         .clipShape(RoundedRectangle(cornerRadius: 20))
@@ -36,6 +38,7 @@ struct CircuitScreen: View {
                             }
                             Text(item.exercise.name).textStyle(.titleM).foregroundStyle(Palette.ink)
                                 .accessibilityAddTraits(.isHeader)
+                                .glitch(on: item.id)
                         }
                         Spacer()
                         if let load = model.engine.targetLoad(for: step) {
@@ -53,6 +56,7 @@ struct CircuitScreen: View {
                 .padding(.horizontal, 20)
                 .padding(.top, 4)
                 .frame(maxHeight: .infinity, alignment: .top)
+                .animation(Motion.flat, value: resting)
 
                 footer(item)
                     .padding(.horizontal, 20)
@@ -96,6 +100,7 @@ struct CircuitScreen: View {
                 HStack(spacing: 8) {
                     SetBoxes(total: moves, done: step.itemIndex, currentColor: theme.signal)
                     Text("Move \(step.itemIndex + 1)/\(moves)").textStyle(.label).foregroundStyle(Palette.ink2)
+                        .glitch(on: step)
                 }
                 .accessibilityHidden(true)
                 Spacer()
@@ -123,10 +128,10 @@ struct CircuitScreen: View {
                         .foregroundStyle(resting ? Palette.ink2 : theme.signal)
                         .minimumScaleFactor(0.5)
                         .lineLimit(1)
-                        .contentTransition(.numericText(countsDown: true))
                     Spacer()
                     Text(resting ? "Rest · \(total)s" : "Work · \(total)s")
                         .textStyle(.label).foregroundStyle(Palette.ink2)
+                        .glitch(on: resting)
                         .padding(.bottom, 10)
                 }
                 HStack(spacing: 2) {
@@ -136,6 +141,7 @@ struct CircuitScreen: View {
                     }
                 }
                 .frame(height: 20)
+                .animation(Motion.tick, value: remaining)
             }
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(resting ? "Rest time remaining" : "Work time remaining")

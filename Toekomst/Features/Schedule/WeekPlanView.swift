@@ -14,18 +14,22 @@ struct WeekPlanView: View {
     @State private var repeatEveryWeek = false
     @State private var saving = false
     @State private var error: String?
+    /// Lets a session card slide to its new day when the order changes.
+    @Namespace private var cards
 
     var body: some View {
         Group {
             switch draft {
             case .loading:
-                LoadingView()
+                LoadingView().transition(.opacity)
             case .failed(let message):
                 LoadingView(message: message) { Task { await load() } }
+                    .transition(.opacity)
             case .loaded(let draft):
-                content(draft)
+                content(draft).transition(.opacity)
             }
         }
+        .animation(Motion.flat, value: draft.phase)
         .background(Palette.bg)
         .task { await load() }
         .presentationBackground(Palette.bg)
@@ -116,13 +120,16 @@ struct WeekPlanView: View {
                 detail: "\(selected.count) of \(draft.templates.count)",
                 detailColor: ready ? Palette.ink2 : Palette.ink
             )
+            .glitch(on: selected.count)
             HStack(spacing: 6) {
                 ForEach(Weekday.allCases, id: \.self) { day in
                     let on = selected.contains(day)
                     let date = weekStart.adding(days: day.rawValue - 1)
                     Button {
-                        if on { selected.remove(day) } else { selected.insert(day) }
-                        manualOrder = nil
+                        withAnimation(Motion.flat) {
+                            if on { selected.remove(day) } else { selected.insert(day) }
+                            manualOrder = nil
+                        }
                     } label: {
                         VStack(spacing: 4) {
                             Text(day.shortName).textStyle(.label)
@@ -146,7 +153,9 @@ struct WeekPlanView: View {
         let (badge, color, text) = statusCopy(plan, needed: needed)
         return HStack(alignment: .top, spacing: 12) {
             Badge(text: badge, foreground: color)
+                .glitch(on: badge)
             Text(text).textStyle(.footnote).foregroundStyle(Palette.ink)
+                .glitch(on: text)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(.horizontal, 16)
@@ -227,6 +236,7 @@ struct WeekPlanView: View {
             .padding(.vertical, 10)
             .background(Palette.surface1, in: RoundedRectangle(cornerRadius: 16))
             .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(warn ? Palette.negative : .clear, lineWidth: 1))
+            .matchedGeometryEffect(id: template.id, in: cards)
         }
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(day.fullName), \(template.kind.displayName), \(template.title)\(warn ? ", clashes with a neighbouring day" : "")")
@@ -236,7 +246,7 @@ struct WeekPlanView: View {
         var order = plan.sessions.map(\.id)
         guard let a = order.firstIndex(of: first), let b = order.firstIndex(of: second) else { return }
         order.swapAt(a, b)
-        withAnimation(.snappy) { manualOrder = order }
+        withAnimation(Motion.flat) { manualOrder = order }
     }
 
     private var repeatToggle: some View {

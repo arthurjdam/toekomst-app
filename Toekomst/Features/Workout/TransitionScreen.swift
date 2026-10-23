@@ -8,10 +8,6 @@ struct TransitionScreen: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            WorkoutHeader(model: model)
-                .padding(.horizontal, 20)
-                .padding(.top, 4)
-
             ScrollView {
                 VStack(spacing: 16) {
                     if let finished = model.engine.previousStep {
@@ -152,6 +148,7 @@ struct TransitionScreen: View {
         VStack(spacing: 10) {
             HStack {
                 Text(model.isOvertime ? "Rest done" : "Rest running").textStyle(.label).foregroundStyle(Palette.ink2)
+                    .glitch(on: model.isOvertime)
                 Spacer()
                 Text(model.isOvertime ? "+\(Format.clock(model.remainingSeconds)) over" : "\(Format.clock(model.remainingSeconds)) left")
                     .textStyle(.readout).textCase(.uppercase).foregroundStyle(Palette.ink)

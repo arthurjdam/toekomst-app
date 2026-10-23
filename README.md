@@ -95,6 +95,20 @@ range is hit on every set two sessions running, and loads hold when the ready
 check reports soreness or low energy. Bodyweight is tracked against +0.25 to
 0.5 lb a week.
 
+Motion follows two rules (`Toekomst/DesignSystem/Motion.swift`):
+
+- **Flat** for anything that can interpolate: pages, tabs, progress bars,
+  selection highlights, chart data and bar lengths slide, fade, resize or
+  recolor on one ease-out curve with no springs, scaling or blur. The workout
+  progress bar keeps a single view per exercise, so finishing a set or an
+  exercise collapses and widens its slots instead of redrawing the bar.
+- **Glitch** for content that swaps rather than moves: labels, numbers,
+  status text and demo figures jump sideways in hard steps with a signal
+  scan line (about 0.2 s), then settle. Countdown digits tick without
+  animation, like a clock.
+
+With Reduce Motion on, page slides become fades and glitches are skipped.
+
 Additions beyond the designed screens:
 
 - Settings tab (auto-start next set, keep screen on, haptics, accent, fixture data)
