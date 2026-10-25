@@ -161,7 +161,7 @@ struct TransitionScreen: View {
         VStack(spacing: 10) {
             HStack {
                 Text(model.isOvertime ? "Rest done" : "Rest running").textStyle(.label).foregroundStyle(Palette.ink2)
-                    .glitch(on: model.isOvertime)
+                    .wipe(on: model.isOvertime)
                 Spacer()
                 Text(model.isOvertime ? "+\(Format.clock(model.remainingSeconds)) over" : "\(Format.clock(model.remainingSeconds)) left")
                     .textStyle(.readout).textCase(.uppercase).foregroundStyle(Palette.ink)

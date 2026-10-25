@@ -73,10 +73,10 @@ struct ScheduleView: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Block \(week.block.blockNumber) · Week \(week.block.week) of \(week.block.weeksInBlock)")
                     .textStyle(.label).foregroundStyle(Palette.ink2)
-                    .glitch(on: week.block)
+                    .wipe(on: week.block)
                 Text(Format.weekRange(week.weekStart)).textStyle(.titleL).foregroundStyle(Palette.ink)
                     .accessibilityAddTraits(.isHeader)
-                    .glitch(on: week.weekStart)
+                    .wipe(on: week.weekStart)
             }
             Spacer()
             HStack(spacing: 8) {
@@ -117,7 +117,7 @@ struct ScheduleView: View {
                 Text("Training days this week").textStyle(.label).foregroundStyle(Palette.ink2)
                 Text(week.trainingDays.map(\.shortName).joined(separator: " · "))
                     .textStyle(.headline).foregroundStyle(Palette.ink)
-                    .glitch(on: week.trainingDays)
+                    .wipe(on: week.trainingDays)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             if let target {
@@ -178,7 +178,7 @@ private struct DayRow: View {
             HStack {
                 KindBadge(kind: session.kind)
                 Spacer()
-                status(session).glitch(on: session.status)
+                status(session).wipe(on: session.status)
             }
             Text(session.title).textStyle(.headline).foregroundStyle(Palette.ink)
         }

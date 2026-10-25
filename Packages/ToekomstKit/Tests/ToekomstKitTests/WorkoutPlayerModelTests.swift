@@ -62,6 +62,33 @@ final class WorkoutPlayerModelTests: XCTestCase {
         model.stop()
     }
 
+    func testSkippingSetDetailsLogsAsPlanned() async throws {
+        let repository = try FixtureTrainingRepository()
+        let session = try await repository.session(id: "lower-mass@2026-10-22")
+        let model = WorkoutPlayerModel(session: session, repository: repository, autoStartAfterRest: true, logsSetDetails: false)
+        model.begin(with: nil)
+        model.completeAsPlanned() // warm-up bike
+        model.endRest()
+        model.doneSet()
+        XCTAssertFalse(model.showLogSheet, "no sheet when set details are off")
+        XCTAssertEqual(model.screen, .rest)
+        XCTAssertEqual(model.lastLogged?.reps, 10)
+        XCTAssertEqual(model.lastLogged?.load, 35)
+        XCTAssertNil(model.lastLogged?.repsInReserve)
+
+        // Finish the session without rating any set: no load increases.
+        while model.currentStep != nil {
+            if model.screen == .rest || model.screen == .transition { model.endRest(); continue }
+            model.doneSet()
+        }
+        for _ in 0..<50 where model.screen != .summary {
+            try await Task.sleep(nanoseconds: 20_000_000)
+        }
+        XCTAssertEqual(model.result?.setsCompleted, 23)
+        XCTAssertFalse(model.result!.nextTargets.contains { $0.direction == .increase })
+        model.stop()
+    }
+
     func testCircuitFlow() async throws {
         let model = try await makeModel("conditioning-b@2026-10-24")
         model.begin(with: nil)

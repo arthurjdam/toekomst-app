@@ -108,17 +108,25 @@ Motion follows two rules (`Toekomst/DesignSystem/Motion.swift`):
 - **Progress bar** in two steps: the set's tick fills left to right, then a
   finished exercise collapses to a square while the next one opens into its
   set ticks.
-- **Glitch** for content that swaps rather than moves: labels, numbers,
-  status text and demo figures jump sideways in hard steps with a signal
-  scan line (about 0.2 s), then settle. Countdown digits tick without
-  animation, like a clock.
+- **Wipe** for text that swaps rather than moves: labels, numbers and
+  status text are covered by a white bar growing from the left, swap
+  underneath, and are revealed as the bar leaves towards the right (about
+  0.4 s). Demo figures cross-fade. Countdown digits tick without animation,
+  like a clock.
 
 With Reduce Motion on, page slides and workout morphs become fades and
-glitches are skipped.
+wipes are skipped.
+
+During a workout the header shows a **Live** indicator: a blinking signal
+square, the elapsed time with a blinking colon, and "Live" ("Paused" while
+paused).
 
 Additions beyond the designed screens:
 
-- Settings tab (auto-start next set, keep screen on, haptics, accent, fixture data)
+- Settings tab (auto-start next set, log each set, keep screen on, haptics,
+  accent, fixture data). With "Log each set" off, Done set logs the planned
+  weight and reps and goes straight to rest; such sets don't earn load
+  increases.
 - Daily check-in sheet, exercise info sheet, lift detail screen
 - Rest days, completed sessions and missed sessions on Today and Schedule
 - Pause menu (resume, skip a set, end and save, discard)

@@ -14,6 +14,12 @@ struct SettingsView: View {
             section("Workout") {
                 toggleRow("Auto-start next set", detail: "Opens the next set when rest reaches 0:00.", isOn: $settings.autoStartAfterRest)
                 Hairline()
+                toggleRow(
+                    "Log each set",
+                    detail: "Asks for weight, reps and how many more you could do. Off: Done set logs the plan and goes straight to rest. Load increases need logged sets.",
+                    isOn: $settings.logSetDetails
+                )
+                Hairline()
                 toggleRow("Keep screen on", detail: "While a workout is running.", isOn: $settings.keepScreenOn)
                 Hairline()
                 toggleRow("Haptics", detail: "Taps when a set is saved or a timer ends.", isOn: $settings.haptics)

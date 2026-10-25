@@ -20,7 +20,7 @@ struct CircuitScreen: View {
 
                 VStack(spacing: 16) {
                     DemoFigure(demo: item.exercise.demo, code: item.exercise.code)
-                        .glitch(on: item.id)
+                        .crossfade(on: item.id)
                         .frame(minHeight: 140, maxHeight: 208)
                         .background(Palette.surface1)
                         .clipShape(RoundedRectangle(cornerRadius: 20))
@@ -40,8 +40,8 @@ struct CircuitScreen: View {
                             }
                             Text(item.exercise.name).textStyle(.titleM).foregroundStyle(Palette.ink)
                                 .accessibilityAddTraits(.isHeader)
+                                .wipe(on: item.id)
                                 .stage(.title, in: stage)
-                                .glitch(on: item.id)
                         }
                         Spacer()
                         if let load = model.engine.targetLoad(for: step) {
@@ -76,8 +76,9 @@ struct CircuitScreen: View {
             HStack {
                 Badge(text: model.session.kind.displayName, style: .signal, glyph: .boltFilled)
                 Spacer()
-                Text((group.title == "Circuit" ? "" : "\(group.title) · ") + "Round \(step.setNumber) of \(rounds)")
+                Text((group.title == "Circuit" ? "" : "\(group.title) · ") + "Round \(step.setNumber)/\(rounds) · Move \(step.itemIndex + 1)/\(moves)")
                     .textStyle(.label).foregroundStyle(Palette.ink)
+                    .wipe(on: step)
             }
             HStack(spacing: 12) {
                 ForEach(1...rounds, id: \.self) { round in
@@ -100,12 +101,7 @@ struct CircuitScreen: View {
             .accessibilityElement(children: .ignore)
             .accessibilityLabel("Round \(step.setNumber) of \(rounds), move \(step.itemIndex + 1) of \(moves)")
             HStack {
-                HStack(spacing: 8) {
-                    SetBoxes(total: moves, done: step.itemIndex, currentColor: theme.signal)
-                    Text("Move \(step.itemIndex + 1)/\(moves)").textStyle(.label).foregroundStyle(Palette.ink2)
-                        .glitch(on: step)
-                }
-                .accessibilityHidden(true)
+                LiveIndicator(startedAt: model.engine.startedAt, isRunning: model.hasBegun && !model.isPaused)
                 Spacer()
                 WorkoutControls(model: model)
             }
@@ -134,7 +130,7 @@ struct CircuitScreen: View {
                     Spacer()
                     Text(resting ? "Rest · \(total)s" : "Work · \(total)s")
                         .textStyle(.label).foregroundStyle(Palette.ink2)
-                        .glitch(on: resting)
+                        .wipe(on: resting)
                         .padding(.bottom, 10)
                 }
                 HStack(spacing: 2) {

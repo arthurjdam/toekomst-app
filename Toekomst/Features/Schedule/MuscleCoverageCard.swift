@@ -65,7 +65,7 @@ private struct CoverageRow: View {
             .frame(width: 104, alignment: .leading)
             RangeBar(value: Double(row.hardSets), dimmed: status == .under)
             Text("\(row.hardSets)").textStyle(.readout)
-                .glitch(on: row.hardSets)
+                .wipe(on: row.hardSets)
                 .foregroundStyle(row.hardSets < TrainingRules.weeklySetRange.lowerBound ? Palette.negative : Palette.ink)
                 .frame(width: 28, alignment: .trailing)
             Text("\(row.hits)×").textStyle(.readout)

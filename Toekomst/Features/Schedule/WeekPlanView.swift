@@ -118,9 +118,9 @@ struct WeekPlanView: View {
             SectionHeader(
                 title: "Training days",
                 detail: "\(selected.count) of \(draft.templates.count)",
-                detailColor: ready ? Palette.ink2 : Palette.ink
+                detailColor: ready ? Palette.ink2 : Palette.ink,
+                wipesDetail: true
             )
-            .glitch(on: selected.count)
             HStack(spacing: 6) {
                 ForEach(Weekday.allCases, id: \.self) { day in
                     let on = selected.contains(day)
@@ -153,9 +153,9 @@ struct WeekPlanView: View {
         let (badge, color, text) = statusCopy(plan, needed: needed)
         return HStack(alignment: .top, spacing: 12) {
             Badge(text: badge, foreground: color)
-                .glitch(on: badge)
+                .wipe(on: badge)
             Text(text).textStyle(.footnote).foregroundStyle(Palette.ink)
-                .glitch(on: text)
+                .wipe(on: text)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(.horizontal, 16)

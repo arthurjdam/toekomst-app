@@ -34,7 +34,7 @@ struct ExerciseScreen: View {
 
     private func figure(_ item: PlannedExercise) -> some View {
         DemoFigure(demo: item.exercise.demo, angle: angle, code: item.exercise.code)
-            .glitch(on: angle)
+            .crossfade(on: angle)
             .frame(minHeight: 150, maxHeight: 272)
             .background(Palette.surface1)
             .clipShape(RoundedRectangle(cornerRadius: 20))
@@ -66,8 +66,11 @@ struct ExerciseScreen: View {
                     .accessibilityLabel("Exercise info and form cues")
             }
             .overlay(alignment: .bottomLeading) {
-                if item.exercise.loadKind == .barbell {
-                    Text("Bar path · mid-foot").textStyle(.label).foregroundStyle(Palette.ink3)
+                // The exercise counter sits in the demo card; the header row
+                // belongs to the live clock.
+                if let step = model.currentStep {
+                    Text("Exercise \(model.engine.exerciseNumber(of: step)) of \(model.engine.exerciseCount) · \(model.engine.group(of: step).title)")
+                        .textStyle(.label).foregroundStyle(Palette.ink3)
                         .padding(.horizontal, 16).padding(.bottom, 14)
                 }
             }
@@ -105,7 +108,7 @@ struct ExerciseScreen: View {
             HStack(alignment: .bottom) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(model.timedSetRunning ? "Time left" : "Time").textStyle(.label).foregroundStyle(Palette.ink2)
-                        .glitch(on: model.timedSetRunning)
+                        .wipe(on: model.timedSetRunning)
                     Text(Format.clock(model.timedSetRunning ? max(0, model.remainingSeconds) : duration))
                         .textStyle(.metricXL).foregroundStyle(Palette.ink)
                         .stage(.metric, in: stage)

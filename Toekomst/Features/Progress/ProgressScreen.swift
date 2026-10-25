@@ -27,7 +27,7 @@ struct ProgressScreen: View {
                         .transition(.opacity)
                 case .loaded(let progress):
                     // A new range redraws the same cards: charts and bars move flat,
-                    // numbers glitch.
+                    // numbers wipe.
                     VStack(alignment: .leading, spacing: 24) {
                         BodyweightCard(trend: progress.bodyweight, range: progress.range)
                         LiftsSection(lifts: progress.lifts)
@@ -71,17 +71,17 @@ private struct BodyweightCard: View {
                         Text("Bodyweight").textStyle(.label).foregroundStyle(Palette.ink2)
                         HStack(alignment: .firstTextBaseline, spacing: 8) {
                             Text(Format.weight(trend.current)).textStyle(.metricL).foregroundStyle(Palette.ink)
-                                .glitch(on: trend.current)
+                                .wipe(on: trend.current)
                             Text("lb").textStyle(.readout).foregroundStyle(Palette.ink2)
                         }
                     }
                     Spacer()
                     VStack(alignment: .trailing, spacing: 4) {
                         Text("\(trend.weeklyChange >= 0 ? "▲" : "▼") \(String(format: "%.2f", abs(trend.weeklyChange))) lb/wk")
-                            .glitch(on: trend.weeklyChange)
+                            .wipe(on: trend.weeklyChange)
                             .textStyle(.readout)
                             .foregroundStyle(trend.weeklyChange >= 0 ? Palette.positive : Palette.negative)
-                        Badge(text: paceLabel).glitch(on: paceLabel)
+                        Badge(text: paceLabel).wipe(on: paceLabel)
                     }
                     .padding(.top, 2)
                 }
@@ -91,7 +91,7 @@ private struct BodyweightCard: View {
                     .frame(height: 140)
 
                 HStack {
-                    Text(startLabel).glitch(on: startLabel)
+                    Text(startLabel).wipe(on: startLabel)
                     Spacer()
                     Text("Now")
                 }
@@ -230,11 +230,11 @@ private struct LiftTile: View {
             Text(lift.name).textStyle(.label).foregroundStyle(Palette.ink2)
             HStack(alignment: .firstTextBaseline, spacing: 6) {
                 Text(Format.weight(lift.estimatedMax.rounded())).textStyle(.metricM).foregroundStyle(Palette.ink)
-                    .glitch(on: lift.estimatedMax)
+                    .wipe(on: lift.estimatedMax)
                 Text("lb").textStyle(.readout).foregroundStyle(Palette.ink2)
                 Spacer(minLength: 0)
                 Text(changeText).textStyle(.readout).foregroundStyle(lift.change >= 0 ? Palette.positive : Palette.negative)
-                    .glitch(on: changeText)
+                    .wipe(on: changeText)
             }
             Sparkline(lift: lift)
                 .frame(height: 40)

@@ -5,7 +5,8 @@ import Foundation
 /// The real back-end owns progression decisions; this is the stand-in the
 /// fixture repository uses, following the program rules: go up in load once
 /// the top of the rep range is hit on every set two sessions running, and
-/// flag sets that fell short.
+/// flag sets that fell short. Only sets the person confirmed (with a reps in
+/// reserve rating) can earn an increase; sets logged "as planned" can't.
 public enum SessionResultBuilder {
     public static func build(session: WorkoutSession, log: SessionLog) -> SessionResult {
         let warmupGroups = Set(session.groups.filter(\.warmup).map(\.id))
@@ -84,7 +85,8 @@ public enum SessionResultBuilder {
                   let load = logged.compactMap(\.load).last
             else { continue }
             let reps = logged.compactMap(\.reps)
-            let hitTopEverySet = reps.count >= item.prescription.sets && reps.allSatisfy { $0 >= target.max }
+            let confirmed = logged.allSatisfy { $0.repsInReserve != nil }
+            let hitTopEverySet = confirmed && reps.count >= item.prescription.sets && reps.allSatisfy { $0 >= target.max }
             let hitTopLastTime = item.history.map { !$0.lastReps.isEmpty && $0.lastReps.allSatisfy { $0 >= target.max } } ?? false
             let lightSets = reps.filter { $0 < target.min }.count
 

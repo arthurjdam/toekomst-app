@@ -62,7 +62,7 @@ struct LogSetSheet: View {
                         .foregroundStyle(noteColor)
                         .frame(maxWidth: .infinity)
                         .multilineTextAlignment(.center)
-                        .glitch(on: note)
+                        .wipe(on: note)
                         .accessibilityAddTraits(.updatesFrequently)
                 }
                 reserve

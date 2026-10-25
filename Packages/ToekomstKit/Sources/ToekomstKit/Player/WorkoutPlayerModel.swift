@@ -21,6 +21,9 @@ public final class WorkoutPlayerModel: Identifiable {
     public let repository: any TrainingRepository
     /// Open the next set automatically when rest reaches 0:00; otherwise rest runs into overtime.
     public let autoStartAfterRest: Bool
+    /// Ask for weight, reps and reps in reserve after each set. When off,
+    /// "Done set" logs the planned weight and reps and goes straight on.
+    public let logsSetDetails: Bool
     public private(set) var engine: WorkoutEngine
     public private(set) var screen: Screen = .exercise
     public private(set) var circuitPhase: CircuitPhase = .work
@@ -31,8 +34,6 @@ public final class WorkoutPlayerModel: Identifiable {
     public var showLogSheet = false
     public var showPauseMenu = false
     public var showInfo = false
-    /// The time chip toggles between time left and time elapsed.
-    public var showElapsed = false
 
     /// Updated once a second while the workout runs; views read it for countdowns.
     public private(set) var now = Date()
@@ -56,9 +57,15 @@ public final class WorkoutPlayerModel: Identifiable {
     @ObservationIgnored private var overtimeSignalled = false
     @ObservationIgnored private var ticker: Task<Void, Never>?
 
-    public init(session: WorkoutSession, repository: any TrainingRepository, autoStartAfterRest: Bool) {
+    public init(
+        session: WorkoutSession,
+        repository: any TrainingRepository,
+        autoStartAfterRest: Bool,
+        logsSetDetails: Bool = true
+    ) {
         self.repository = repository
         self.autoStartAfterRest = autoStartAfterRest
+        self.logsSetDetails = logsSetDetails
         self.engine = WorkoutEngine(session: session, startedAt: Date())
         startTicker()
     }
@@ -88,10 +95,6 @@ public final class WorkoutPlayerModel: Identifiable {
     public var minutesLeft: Int {
         let countdown = max(0, remainingSeconds)
         return Int((Double(engine.estimatedSecondsRemaining() + countdown) / 60).rounded(.up))
-    }
-
-    public var timeChipText: String {
-        showElapsed ? "\(Format.clock(elapsedSeconds)) in" : "~\(minutesLeft) min left"
     }
 
     // MARK: - Flow
@@ -131,10 +134,11 @@ public final class WorkoutPlayerModel: Identifiable {
         startCountdown(seconds: duration)
     }
 
-    /// "Done set": timed work logs straight away, rep work opens the log sheet.
+    /// "Done set": timed work logs straight away; rep work opens the log sheet,
+    /// unless set details are switched off.
     public func doneSet() {
         guard let item = currentItem else { return }
-        if item.prescription.isTimed || item.prescription.reps == nil {
+        if item.prescription.isTimed || item.prescription.reps == nil || !logsSetDetails {
             completeAsPlanned()
         } else {
             showLogSheet = true

@@ -110,7 +110,7 @@ private struct LinkRow: View {
                 Text(title).textStyle(.headline).foregroundStyle(Palette.ink)
                 if let subtitle {
                     Text(subtitle).textStyle(.callout).foregroundStyle(Palette.ink2)
-                        .glitch(on: subtitle)
+                        .wipe(on: subtitle)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -263,8 +263,7 @@ struct WeekStrip: View {
 
     var body: some View {
         VStack(spacing: 8) {
-            SectionHeader(title: "This week", detail: "\(week.completedCount) of \(week.sessions.count) done", detailColor: Palette.ink2)
-                .glitch(on: week.completedCount)
+            SectionHeader(title: "This week", detail: "\(week.completedCount) of \(week.sessions.count) done", detailColor: Palette.ink2, wipesDetail: true)
             HStack(spacing: 6) {
                 ForEach(week.days) { day in
                     VStack(spacing: 6) {

@@ -28,7 +28,7 @@ struct ExerciseInfoSheet: View {
                 }
 
                 DemoFigure(demo: item.exercise.demo, angle: angle, code: item.exercise.code)
-                    .glitch(on: angle)
+                    .crossfade(on: angle)
                     .frame(height: 220)
                     .background(Palette.bg, in: RoundedRectangle(cornerRadius: 20))
                     .clipShape(RoundedRectangle(cornerRadius: 20))

@@ -95,9 +95,9 @@ struct ReadinessSheet: View {
                 Badge(text: hold ? "= Hold" : "▲ Go", style: hold ? .neutral : .signalDim)
                 Text(hold ? "Holding loads today" : "Going for it").textStyle(.titleM).foregroundStyle(Palette.ink)
             }
-            .glitch(on: hold)
+            .wipe(on: hold)
             Text(reason).textStyle(.footnote).foregroundStyle(Palette.ink2)
-                .glitch(on: reason)
+                .wipe(on: reason)
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)

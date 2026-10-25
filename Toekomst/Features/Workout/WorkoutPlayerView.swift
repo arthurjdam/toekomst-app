@@ -131,7 +131,7 @@ struct WorkoutPlayerView: View {
     }
 }
 
-/// Session progress, the exercise counter, time chip and pause.
+/// Session progress, the live clock, time left and pause.
 struct WorkoutHeader: View {
     let model: WorkoutPlayerModel
 
@@ -139,12 +139,7 @@ struct WorkoutHeader: View {
         VStack(alignment: .leading, spacing: 6) {
             SessionProgressBar(engine: model.engine)
             HStack {
-                if let step = model.currentStep {
-                    let label = "Exercise \(model.engine.exerciseNumber(of: step)) of \(model.engine.exerciseCount) · \(model.engine.group(of: step).title)"
-                    Text(label)
-                        .textStyle(.label).foregroundStyle(Palette.ink2)
-                        .glitch(on: label)
-                }
+                LiveIndicator(startedAt: model.engine.startedAt, isRunning: model.hasBegun && !model.isPaused)
                 Spacer()
                 WorkoutControls(model: model)
             }
@@ -153,20 +148,17 @@ struct WorkoutHeader: View {
     }
 }
 
-/// Time-left chip and pause button.
+/// Time left and the pause button.
 struct WorkoutControls: View {
-    @Bindable var model: WorkoutPlayerModel
+    let model: WorkoutPlayerModel
 
     var body: some View {
         HStack(spacing: 4) {
-            Button(model.timeChipText) { model.showElapsed.toggle() }
-                .buttonStyle(.plain)
+            Text("~\(model.minutesLeft) min left")
                 .textStyle(.readout)
                 .foregroundStyle(Palette.ink)
                 .padding(.horizontal, 10)
-                .frame(minHeight: 44)
-                .glitch(on: model.showElapsed)
-                .accessibilityHint("Switches between time left and time elapsed")
+                .wipe(on: model.minutesLeft)
             Button { model.pause() } label: { Glyph(.pause, size: 20) }
                 .buttonStyle(IconButtonStyle())
                 .accessibilityLabel("Pause")

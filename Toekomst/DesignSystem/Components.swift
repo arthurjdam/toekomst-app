@@ -106,12 +106,20 @@ struct SectionHeader: View {
     let title: String
     var detail: String?
     var detailColor: Color = Palette.ink3
+    /// Wipe the detail when it changes (counts that update in place).
+    var wipesDetail = false
 
     var body: some View {
         HStack(alignment: .firstTextBaseline) {
             Text(title).foregroundStyle(Palette.ink2)
             Spacer(minLength: 8)
-            if let detail { Text(detail).foregroundStyle(detailColor) }
+            if let detail {
+                if wipesDetail {
+                    Text(detail).foregroundStyle(detailColor).wipe(on: detail)
+                } else {
+                    Text(detail).foregroundStyle(detailColor)
+                }
+            }
         }
         .textStyle(.label)
         .accessibilityElement(children: .combine)

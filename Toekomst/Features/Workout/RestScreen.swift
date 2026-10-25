@@ -73,7 +73,7 @@ struct RestScreen: View {
                 .animation(Motion.tick, value: fraction)
             VStack(spacing: 6) {
                 Text(label).textStyle(.label).foregroundStyle(model.isOvertime ? Palette.negative : Palette.ink2)
-                    .glitch(on: label)
+                    .wipe(on: label)
                 Text((model.isOvertime ? "+" : "") + Format.clock(remaining))
                     .textStyle(.timer)
                     .foregroundStyle(model.isOvertime ? Palette.ink2 : Palette.ink)
@@ -129,7 +129,7 @@ struct RestScreen: View {
         let nextSet = model.currentStep?.setNumber ?? 0
         return VStack(spacing: 8) {
             Text(hint(nextSet: nextSet)).textStyle(.label).foregroundStyle(Palette.ink3)
-                .glitch(on: model.isOvertime)
+                .wipe(on: model.isOvertime)
                 .padding(.bottom, 4)
             HStack(spacing: 8) {
                 Button("-15s") { model.adjustRest(by: -15) }
@@ -144,7 +144,7 @@ struct RestScreen: View {
             } label: {
                 HStack(spacing: 10) {
                     Text(model.isOvertime ? "Start set \(nextSet)" : "Skip rest · set \(nextSet)")
-                        .glitch(on: model.isOvertime)
+                        .wipe(on: model.isOvertime)
                     Glyph(.skip, size: 18, weight: 2.25)
                 }
             }

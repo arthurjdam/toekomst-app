@@ -5,11 +5,11 @@ import SwiftUI
 /// - **Flat**: anything that can interpolate (position, size, opacity, color)
 ///   eases out with no overshoot, no scaling, no blur. Pages, progress bars,
 ///   selection highlights and charts all use it.
-/// - **Glitch**: values that can't interpolate (a number or label swapping,
-///   a demo figure redrawing) jitter sideways in hard steps with a signal
-///   scan line, then settle.
+/// - **Wipe**: text that can't interpolate (a number or label swapping) is
+///   covered by a white bar growing from the left; the text swaps underneath;
+///   the bar then leaves towards the right. Figures that swap cross-fade.
 ///
-/// With Reduce Motion on, pages fade instead of sliding and glitches are skipped.
+/// With Reduce Motion on, pages fade instead of sliding and wipes are skipped.
 enum Motion {
     /// The house curve: fast start, soft landing, no overshoot.
     static let flat = Animation.timingCurve(0.2, 0, 0, 1, duration: 0.22)
@@ -22,6 +22,8 @@ enum Motion {
     static let stage = Animation.timingCurve(0.2, 0, 0, 1, duration: 0.45)
     /// Each step of the session progress bar (fill, then collapse and expand).
     static let progress = Animation.timingCurve(0.2, 0, 0, 1, duration: 0.4)
+    /// A full text wipe: cover in, then out.
+    static let wipe = Animation.linear(duration: 0.42)
     /// How far a page travels as it fades in or out.
     static let pageOffset: CGFloat = 32
 }
@@ -75,79 +77,101 @@ extension View {
     }
 }
 
-struct GlitchFrame {
-    var offset: CGFloat = 0
-    var opacity: Double = 1
-    var scan: Double = 0
-    var scanY: CGFloat = 0
+/// One side of the wipe. The leaving text is covered by a bar growing from
+/// the left during the first half and then disappears; the arriving text is
+/// hidden during the first half and revealed as the bar shrinks towards the
+/// right in the second half. Both meet fully covered at the midpoint.
+private struct WipeCover: ViewModifier, Animatable {
+    /// 0 to 1 over the whole wipe.
+    var progress: Double
+    let leaving: Bool
+
+    var animatableData: Double {
+        get { progress }
+        set { progress = newValue }
+    }
+
+    /// Ease-out within each half, so the bar lands softly at each end.
+    private func eased(_ value: Double) -> Double {
+        let clamped = min(max(value, 0), 1)
+        return 1 - pow(1 - clamped, 3)
+    }
+
+    private var visible: Bool { leaving ? progress < 0.5 : progress >= 0.5 }
+
+    private var coverFraction: Double {
+        leaving ? eased(progress * 2) : 1 - eased((progress - 0.5) * 2)
+    }
+
+    func body(content: Content) -> some View {
+        content
+            .overlay {
+                GeometryReader { geometry in
+                    Rectangle()
+                        .fill(Palette.ink)
+                        .frame(width: geometry.size.width * coverFraction)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: leaving ? .leading : .trailing)
+                }
+                .allowsHitTesting(false)
+            }
+            .opacity(visible ? 1 : 0)
+    }
 }
 
-private struct GlitchModifier<Trigger: Equatable>: ViewModifier {
+extension AnyTransition {
+    /// Old text is covered from the left, new text is revealed towards the right.
+    static var wipe: AnyTransition {
+        .asymmetric(
+            // Arriving: progress runs 0 → 1 as it settles into place.
+            insertion: .modifier(active: WipeCover(progress: 0, leaving: false), identity: WipeCover(progress: 1, leaving: false)),
+            // Leaving: progress runs 0 → 1 as it goes.
+            removal: .modifier(active: WipeCover(progress: 1, leaving: true), identity: WipeCover(progress: 0, leaving: true))
+        )
+    }
+}
+
+private struct WipeModifier<Trigger: Hashable>: ViewModifier {
     let trigger: Trigger
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @Environment(\.theme) private var theme
 
     func body(content: Content) -> some View {
         if reduceMotion {
             content
         } else {
-            content.keyframeAnimator(initialValue: GlitchFrame(), trigger: trigger) { view, frame in
-                view
-                    .offset(x: frame.offset)
-                    .opacity(frame.opacity)
-                    .overlay {
-                        Rectangle()
-                            .fill(theme.signal)
-                            .frame(height: 2)
-                            .offset(y: frame.scanY)
-                            .opacity(frame.scan)
-                            .allowsHitTesting(false)
-                    }
-            } keyframes: { _ in
-                // Hard steps (move, then hold) rather than smooth curves.
-                KeyframeTrack(\.offset) {
-                    MoveKeyframe(-4)
-                    LinearKeyframe(-4, duration: 0.05)
-                    MoveKeyframe(3)
-                    LinearKeyframe(3, duration: 0.05)
-                    MoveKeyframe(-2)
-                    LinearKeyframe(-2, duration: 0.04)
-                    MoveKeyframe(1)
-                    LinearKeyframe(1, duration: 0.04)
-                    MoveKeyframe(0)
-                }
-                KeyframeTrack(\.opacity) {
-                    MoveKeyframe(0.4)
-                    LinearKeyframe(0.4, duration: 0.05)
-                    MoveKeyframe(1)
-                    LinearKeyframe(1, duration: 0.05)
-                    MoveKeyframe(0.7)
-                    LinearKeyframe(0.7, duration: 0.04)
-                    MoveKeyframe(1)
-                }
-                KeyframeTrack(\.scan) {
-                    MoveKeyframe(0.9)
-                    LinearKeyframe(0.9, duration: 0.14)
-                    MoveKeyframe(0)
-                }
-                KeyframeTrack(\.scanY) {
-                    MoveKeyframe(-5)
-                    LinearKeyframe(-5, duration: 0.05)
-                    MoveKeyframe(4)
-                    LinearKeyframe(4, duration: 0.05)
-                    MoveKeyframe(0)
-                    LinearKeyframe(0, duration: 0.04)
-                }
+            // A new identity per value keeps the old text on screen (leaving)
+            // while the new one arrives, so the bar really covers the old text.
+            ZStack {
+                content
+                    .id(trigger)
+                    .transition(.wipe)
             }
+            .animation(Motion.wipe, value: trigger)
         }
     }
 }
 
+private struct CrossfadeModifier<Trigger: Hashable>: ViewModifier {
+    let trigger: Trigger
+
+    func body(content: Content) -> some View {
+        ZStack {
+            content
+                .id(trigger)
+                .transition(.opacity)
+        }
+        .animation(Motion.flat, value: trigger)
+    }
+}
+
 extension View {
-    /// Plays the glitch whenever `trigger` changes. Use for content that swaps
-    /// rather than moves: labels, numbers, figures.
-    func glitch<Trigger: Equatable>(on trigger: Trigger) -> some View {
-        modifier(GlitchModifier(trigger: trigger))
+    /// Wipes whenever `trigger` changes. Use for text that swaps rather than moves.
+    func wipe<Trigger: Hashable>(on trigger: Trigger) -> some View {
+        modifier(WipeModifier(trigger: trigger))
+    }
+
+    /// Cross-fades whenever `trigger` changes. Use for figures and other large content.
+    func crossfade<Trigger: Hashable>(on trigger: Trigger) -> some View {
+        modifier(CrossfadeModifier(trigger: trigger))
     }
 }
 
