@@ -113,9 +113,12 @@ struct ExerciseScreen: View {
                         .textStyle(.metricXL).foregroundStyle(Palette.ink)
                         .stage(.metric, in: stage)
                 }
-                Spacer()
+                // The time keeps its full width; the note wraps beside it instead.
+                .layoutPriority(1)
+                Spacer(minLength: 12)
                 if let note = prescription.note {
                     Text(note).textStyle(.readout).foregroundStyle(Palette.ink2).multilineTextAlignment(.trailing)
+                        .lineLimit(3)
                         .padding(.bottom, 8)
                 }
             }
