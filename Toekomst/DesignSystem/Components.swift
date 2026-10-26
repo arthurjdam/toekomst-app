@@ -163,6 +163,21 @@ struct IconTile: View {
     }
 }
 
+/// Layout for progress rows made of 8-point squares plus one open slot that
+/// takes the remaining width (the session bar, the circuit's round bar).
+enum ProgressRowLayout {
+    static let square: CGFloat = 8
+
+    /// Width left for the open slot after `squares` squares and `gaps` points
+    /// of spacing, rounded down to whole device pixels. A fractional width
+    /// would push every square after it off the pixel grid, smearing and
+    /// clipping their 1-point outlines.
+    static func openWidth(total: CGFloat, squares: Int, gaps: CGFloat, scale: CGFloat) -> CGFloat {
+        let raw = total - CGFloat(squares) * square - gaps
+        return max(square, (raw * scale).rounded(.down) / scale)
+    }
+}
+
 /// Set boxes: filled for done, heavy outline for current, thin outline for upcoming.
 struct SetBoxes: View {
     let total: Int

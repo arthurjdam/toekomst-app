@@ -177,6 +177,7 @@ struct SessionProgressBar: View {
     /// Steps the layout (which exercise is open) reflects. Trails `filled`.
     @State private var layout: Int
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.displayScale) private var displayScale
 
     init(engine: WorkoutEngine) {
         self.engine = engine
@@ -185,23 +186,26 @@ struct SessionProgressBar: View {
     }
 
     var body: some View {
-        let groups = engine.progress(atStep: layout)
-        let indices = engine.stepIndices
-        HStack(spacing: 12) {
-            ForEach(Array(groups.enumerated()), id: \.offset) { groupIndex, items in
-                let hasCurrent = items.contains { $0.isCurrent }
-                HStack(spacing: 4) {
-                    ForEach(Array(items.enumerated()), id: \.offset) { itemIndex, item in
-                        let sets = engine.setCount(for: WorkoutStep(groupIndex: groupIndex, itemIndex: itemIndex, setNumber: 1))
-                        ProgressSlot(
-                            expanded: item.isCurrent,
-                            steps: (1...sets).map { indices[WorkoutStep(groupIndex: groupIndex, itemIndex: itemIndex, setNumber: $0)] ?? 0 },
-                            filled: filled
-                        )
+        GeometryReader { geometry in
+            let groups = engine.progress(atStep: layout)
+            let indices = engine.stepIndices
+            let openWidth = openSlotWidth(total: geometry.size.width, groups: groups)
+            HStack(spacing: Self.groupGap) {
+                ForEach(Array(groups.enumerated()), id: \.offset) { groupIndex, items in
+                    HStack(spacing: Self.slotGap) {
+                        ForEach(Array(items.enumerated()), id: \.offset) { itemIndex, item in
+                            let sets = engine.setCount(for: WorkoutStep(groupIndex: groupIndex, itemIndex: itemIndex, setNumber: 1))
+                            ProgressSlot(
+                                expanded: item.isCurrent,
+                                width: item.isCurrent ? openWidth : ProgressRowLayout.square,
+                                steps: (1...sets).map { indices[WorkoutStep(groupIndex: groupIndex, itemIndex: itemIndex, setNumber: $0)] ?? 0 },
+                                filled: filled
+                            )
+                        }
                     }
                 }
-                .frame(maxWidth: hasCurrent ? .infinity : nil)
             }
+            .frame(maxHeight: .infinity)
         }
         .frame(height: 10)
         .task(id: engine.completedStepCount) {
@@ -216,11 +220,24 @@ struct SessionProgressBar: View {
         .accessibilityLabel("Session progress")
         .accessibilityValue("\(engine.completedStepCount) of \(engine.steps.count) sets done")
     }
+
+    private static let groupGap: CGFloat = 12
+    private static let slotGap: CGFloat = 4
+
+    /// The open exercise takes what the squares and gaps leave, pixel-snapped.
+    private func openSlotWidth(total: CGFloat, groups: [[ExerciseProgress]]) -> CGFloat {
+        let slots = groups.reduce(0) { $0 + $1.count }
+        let open = groups.reduce(0) { $0 + $1.filter(\.isCurrent).count }
+        let gaps = CGFloat(max(0, groups.count - 1)) * Self.groupGap
+            + groups.reduce(0) { $0 + CGFloat(max(0, $1.count - 1)) * Self.slotGap }
+        return ProgressRowLayout.openWidth(total: total, squares: slots - open, gaps: gaps, scale: displayScale)
+    }
 }
 
 /// One exercise in the progress bar: an 8-point square, or set ticks while open.
 private struct ProgressSlot: View {
     let expanded: Bool
+    let width: CGFloat
     /// The step index of each set, in order.
     let steps: [Int]
     let filled: Int
@@ -236,16 +253,16 @@ private struct ProgressSlot: View {
                         .opacity(done ? 0 : 1)
                 }
                 .opacity(expanded ? 0 : 1)
-            HStack(spacing: 3) {
+            // Collapsed, the ticks' spacing goes to zero so they fit inside the
+            // square without clipping (which would also trim its outline).
+            HStack(spacing: expanded ? 3 : 0) {
                 ForEach(Array(steps.enumerated()), id: \.offset) { _, step in
                     ProgressTick(isFilled: step < filled, isNext: step == filled)
                 }
             }
             .opacity(expanded ? 1 : 0)
         }
-        .frame(width: expanded ? nil : 8, height: 8)
-        .frame(maxWidth: expanded ? .infinity : 8)
-        .clipped()
+        .frame(width: width, height: ProgressRowLayout.square)
     }
 }
 

@@ -7,6 +7,7 @@ struct CircuitScreen: View {
     @Bindable var model: WorkoutPlayerModel
     let stage: Namespace.ID
     @Environment(\.theme) private var theme
+    @Environment(\.displayScale) private var displayScale
 
     private var resting: Bool { model.circuitPhase == .rest }
 
@@ -80,22 +81,32 @@ struct CircuitScreen: View {
                     .textStyle(.label).foregroundStyle(Palette.ink)
                     .wipe(on: step)
             }
-            HStack(spacing: 12) {
-                ForEach(1...rounds, id: \.self) { round in
-                    if round < step.setNumber {
-                        RoundedRectangle(cornerRadius: 2).fill(Palette.ink2).frame(width: 8, height: 8)
-                    } else if round > step.setNumber {
-                        RoundedRectangle(cornerRadius: 2).strokeBorder(Palette.lineStrong, lineWidth: 1).frame(width: 8, height: 8)
-                    } else {
-                        HStack(spacing: 3) {
-                            ForEach(0..<moves, id: \.self) { move in
-                                RoundedRectangle(cornerRadius: 2).fill(moveColor(move, current: step.itemIndex))
+            GeometryReader { geometry in
+                // Same pixel-snapped layout as the session bar, so the round
+                // squares' outlines stay crisp.
+                let openWidth = ProgressRowLayout.openWidth(
+                    total: geometry.size.width,
+                    squares: rounds - 1,
+                    gaps: CGFloat(rounds - 1) * 12,
+                    scale: displayScale
+                )
+                HStack(spacing: 12) {
+                    ForEach(1...rounds, id: \.self) { round in
+                        if round < step.setNumber {
+                            RoundedRectangle(cornerRadius: 2).fill(Palette.ink2).frame(width: 8, height: 8)
+                        } else if round > step.setNumber {
+                            RoundedRectangle(cornerRadius: 2).strokeBorder(Palette.lineStrong, lineWidth: 1).frame(width: 8, height: 8)
+                        } else {
+                            HStack(spacing: 3) {
+                                ForEach(0..<moves, id: \.self) { move in
+                                    RoundedRectangle(cornerRadius: 2).fill(moveColor(move, current: step.itemIndex))
+                                }
                             }
+                            .frame(width: openWidth, height: 8)
                         }
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 8)
                     }
                 }
+                .frame(maxHeight: .infinity)
             }
             .frame(height: 10)
             .accessibilityElement(children: .ignore)
