@@ -6,6 +6,7 @@ struct ExerciseScreen: View {
     @Bindable var model: WorkoutPlayerModel
     let stage: Namespace.ID
     @State private var angle = "side"
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         if let step = model.currentStep, let item = model.currentItem {
@@ -109,7 +110,7 @@ struct ExerciseScreen: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(model.timedSetRunning ? "Time left" : "Time").textStyle(.label).foregroundStyle(Palette.ink2)
                         .wipe(on: model.timedSetRunning)
-                    Text(Format.clock(model.timedSetRunning ? max(0, model.remainingSeconds) : duration))
+                    countdown(duration: duration)
                         .textStyle(.metricXL).foregroundStyle(Palette.ink)
                         .stage(.metric, in: stage)
                 }
@@ -182,6 +183,26 @@ struct ExerciseScreen: View {
                     Text("Last \(last)").textStyle(.readout).textCase(.uppercase).foregroundStyle(Palette.ink3)
                 }
             }
+        }
+    }
+
+    /// The timed set's clock. While it runs, the colon blinks in step with the
+    /// countdown: visible for the first half of each second, so the digits
+    /// change while it shows.
+    @ViewBuilder
+    private func countdown(duration: Int) -> some View {
+        if model.timedSetRunning, !model.isPaused, let end = model.phaseEndsAt {
+            let start = end.addingTimeInterval(-Double(model.phaseDuration))
+            TimelineView(.periodic(from: start, by: 0.5)) { context in
+                let left = max(0, end.timeIntervalSince(context.date))
+                let intoSecond = left - left.rounded(.down)
+                BlinkingClock(
+                    seconds: Int(left.rounded(.up)),
+                    colonVisible: reduceMotion || left == 0 || intoSecond >= 0.5
+                )
+            }
+        } else {
+            BlinkingClock(seconds: model.timedSetRunning ? max(0, model.remainingSeconds) : duration, colonVisible: true)
         }
     }
 

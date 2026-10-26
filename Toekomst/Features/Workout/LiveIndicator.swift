@@ -21,13 +21,8 @@ struct LiveIndicator: View {
                     .fill(isRunning ? theme.signal : Palette.ink3)
                     .frame(width: 10, height: 10)
                     .opacity(blinkOn ? 1 : 0)
-                // The colon blinks by fading, not by being removed, so nothing shifts.
-                HStack(spacing: 0) {
-                    Text("\(seconds / 60)")
-                    Text(":").opacity(blinkOn ? 1 : 0)
-                    Text(String(format: "%02d", seconds % 60))
-                }
-                .font(.custom(FontName.monoBold, size: 13, relativeTo: .footnote))
+                BlinkingClock(seconds: seconds, colonVisible: blinkOn)
+                    .font(.custom(FontName.monoBold, size: 13, relativeTo: .footnote))
                 .monospacedDigit()
                 .foregroundStyle(Palette.ink)
                 Text(isRunning ? "Live" : "Paused")
@@ -42,5 +37,22 @@ struct LiveIndicator: View {
             .accessibilityLabel(isRunning ? "Workout live, elapsed time" : "Workout paused")
             .accessibilityValue("\(seconds / 60) minutes \(seconds % 60) seconds")
         }
+    }
+}
+
+/// "m:ss" whose colon can blink. The colon fades rather than disappearing,
+/// so the digits never shift. Style it from outside (`textStyle`, `font`).
+struct BlinkingClock: View {
+    let seconds: Int
+    let colonVisible: Bool
+
+    var body: some View {
+        HStack(spacing: 0) {
+            Text("\(seconds / 60)")
+            Text(":").opacity(colonVisible ? 1 : 0)
+            Text(String(format: "%02d", seconds % 60))
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Format.clock(seconds))
     }
 }
