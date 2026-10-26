@@ -48,6 +48,7 @@ struct CheckInSheet: View {
                 Text(proteinNote)
                     .textStyle(.readout).textCase(.uppercase)
                     .foregroundStyle(protein >= checkIn.proteinTargetMin ? Palette.positive : Palette.ink2)
+                    .wipe(on: protein >= checkIn.proteinTargetMin)
                     .frame(maxWidth: .infinity)
             }
 

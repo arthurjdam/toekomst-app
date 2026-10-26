@@ -65,6 +65,17 @@ final class WorkoutEngineTests: XCTestCase {
         XCTAssertEqual(progress[1][1], .upcoming)
     }
 
+    func testProgressAtAnyStep() async throws {
+        let engine = WorkoutEngine(session: try await lowerMass(), startedAt: start)
+        // Nothing done yet, but asking for step 4 matches logging four sets.
+        let staged = engine.progress(atStep: 4)
+        XCTAssertEqual(staged[0], [.done, .done])
+        XCTAssertEqual(staged[1][0], .current(sets: [.done, .current, .upcoming, .upcoming]))
+        XCTAssertEqual(engine.progress(atStep: 0), engine.progress())
+        XCTAssertEqual(engine.progress(atStep: 99).flatMap { $0 }, Array(repeating: .done, count: 8))
+        XCTAssertEqual(engine.stepIndices[WorkoutStep(groupIndex: 1, itemIndex: 0, setNumber: 2)], 4)
+    }
+
     func testFinishingAGroupAndTheSession() async throws {
         var engine = WorkoutEngine(session: try await lowerMass(), startedAt: start)
         XCTAssertFalse(engine.finishesGroup(engine.steps[0]))

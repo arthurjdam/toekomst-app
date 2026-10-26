@@ -55,6 +55,14 @@ enum TextStyle {
     var font: Font {
         Font.custom(spec.font, size: spec.size, relativeTo: spec.relativeTo)
     }
+
+    /// Numbers and timers never wrap: "5:00" split over two lines reads as two values.
+    var isNumeric: Bool {
+        switch self {
+        case .metricXL, .metricL, .metricM, .timer, .huge: return true
+        default: return false
+        }
+    }
 }
 
 /// PostScript names of the bundled fonts (registered through `UIAppFonts`).
@@ -73,11 +81,19 @@ private struct TextStyleModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         let spec = style.spec
-        content
+        let styled = content
             .font(style.font)
             .tracking(spec.size * spec.tracking)
             .textCase(spec.uppercase ? .uppercase : nil)
             .monospacedDigit()
+        // Only numbers get a line limit. Setting one (even "none") on other
+        // styles would override a `.lineLimit` the call site adds after it.
+        if style.isNumeric {
+            // Squeezed numbers shrink a little rather than wrap.
+            styled.lineLimit(1).minimumScaleFactor(0.6)
+        } else {
+            styled
+        }
     }
 }
 

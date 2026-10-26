@@ -167,7 +167,14 @@ public struct WorkoutEngine: Sendable {
 
     /// Per group, per exercise: done, current (with per-set state) or upcoming.
     public func progress() -> [[ExerciseProgress]] {
-        session.groups.enumerated().map { groupIndex, group in
+        progress(atStep: currentIndex)
+    }
+
+    /// Progress as it was (or will be) with `index` steps completed. The app
+    /// uses this to animate the bar in stages rather than jumping to the end.
+    public func progress(atStep index: Int) -> [[ExerciseProgress]] {
+        let currentIndex = min(max(0, index), steps.count)
+        return session.groups.enumerated().map { groupIndex, group in
             group.items.indices.map { itemIndex in
                 let indices = steps.indices.filter { steps[$0].groupIndex == groupIndex && steps[$0].itemIndex == itemIndex }
                 guard let first = indices.first, let last = indices.last else { return .upcoming }
@@ -181,6 +188,11 @@ public struct WorkoutEngine: Sendable {
     }
 
     public var completedStepCount: Int { currentIndex }
+
+    /// Position of every step in `steps`, for mapping a set tick to its step.
+    public var stepIndices: [WorkoutStep: Int] {
+        Dictionary(uniqueKeysWithValues: steps.enumerated().map { ($0.element, $0.offset) })
+    }
 
     // MARK: - Recording
 

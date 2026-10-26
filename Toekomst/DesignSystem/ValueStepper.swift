@@ -20,7 +20,7 @@ struct ValueStepper: View {
                 Text(label).textStyle(.label).foregroundStyle(Palette.ink2)
                 HStack(alignment: .firstTextBaseline, spacing: 6) {
                     Text(value).textStyle(.metricL).foregroundStyle(Palette.ink)
-                        .contentTransition(.numericText())
+                        .wipe(on: value)
                     if let unit {
                         Text(unit).textStyle(.readout).foregroundStyle(Palette.ink2)
                     }

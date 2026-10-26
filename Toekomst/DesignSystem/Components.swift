@@ -106,12 +106,20 @@ struct SectionHeader: View {
     let title: String
     var detail: String?
     var detailColor: Color = Palette.ink3
+    /// Wipe the detail when it changes (counts that update in place).
+    var wipesDetail = false
 
     var body: some View {
         HStack(alignment: .firstTextBaseline) {
             Text(title).foregroundStyle(Palette.ink2)
             Spacer(minLength: 8)
-            if let detail { Text(detail).foregroundStyle(detailColor) }
+            if let detail {
+                if wipesDetail {
+                    Text(detail).foregroundStyle(detailColor).wipe(on: detail)
+                } else {
+                    Text(detail).foregroundStyle(detailColor)
+                }
+            }
         }
         .textStyle(.label)
         .accessibilityElement(children: .combine)
@@ -155,6 +163,21 @@ struct IconTile: View {
     }
 }
 
+/// Layout for progress rows made of 8-point squares plus one open slot that
+/// takes the remaining width (the session bar, the circuit's round bar).
+enum ProgressRowLayout {
+    static let square: CGFloat = 8
+
+    /// Width left for the open slot after `squares` squares and `gaps` points
+    /// of spacing, rounded down to whole device pixels. A fractional width
+    /// would push every square after it off the pixel grid, smearing and
+    /// clipping their 1-point outlines.
+    static func openWidth(total: CGFloat, squares: Int, gaps: CGFloat, scale: CGFloat) -> CGFloat {
+        let raw = total - CGFloat(squares) * square - gaps
+        return max(square, (raw * scale).rounded(.down) / scale)
+    }
+}
+
 /// Set boxes: filled for done, heavy outline for current, thin outline for upcoming.
 struct SetBoxes: View {
     let total: Int
@@ -189,19 +212,27 @@ struct SegmentedControl<Value: Hashable>: View {
     @Binding var selection: Value
     var height: CGFloat = 36
     var accessibilityLabel: String
+    @Namespace private var highlight
 
     var body: some View {
         HStack(spacing: 4) {
             ForEach(options, id: \.value) { option in
                 let selected = option.value == selection
                 Button {
-                    selection = option.value
+                    withAnimation(Motion.flat) { selection = option.value }
                 } label: {
                     Text(option.label)
                         .textStyle(.action)
                         .foregroundStyle(selected ? Palette.ink : Palette.ink2)
                         .frame(maxWidth: .infinity, minHeight: height)
-                        .background(selected ? Palette.surface3 : .clear, in: RoundedRectangle(cornerRadius: 9))
+                        .background {
+                            // One highlight that slides between options.
+                            if selected {
+                                RoundedRectangle(cornerRadius: 9)
+                                    .fill(Palette.surface3)
+                                    .matchedGeometryEffect(id: "highlight", in: highlight)
+                            }
+                        }
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
@@ -240,6 +271,7 @@ struct ChoiceGrid<Value: Hashable>: View {
                 .accessibilityAddTraits(selected ? .isSelected : [])
             }
         }
+        .animation(Motion.flat, value: selection)
     }
 }
 

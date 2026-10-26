@@ -17,16 +17,19 @@ struct SessionPreviewView: View {
         Group {
             switch state {
             case .loading:
-                LoadingView()
+                LoadingView().transition(.opacity)
             case .failed(let message):
                 LoadingView(message: message) { Task { await load() } }
+                    .transition(.opacity)
             case .loaded(let session):
-                content(session)
+                content(session).transition(.opacity)
             }
         }
+        .animation(Motion.flat, value: state.phase)
         .background(Palette.bg)
         .toolbar(.hidden, for: .navigationBar)
-        .task { await load() }
+        // Reload after writes elsewhere, e.g. finishing this session in the player.
+        .task(id: model.dataVersion) { await load() }
         .sheet(item: $info) { item in
             ExerciseInfoSheet(item: item)
         }
@@ -39,7 +42,8 @@ struct SessionPreviewView: View {
 
     private func load() async {
         do {
-            state = .loaded(try await model.repository.session(id: sessionID))
+            let session = try await model.repository.session(id: sessionID)
+            withAnimation(Motion.flat) { state = .loaded(session) }
         } catch {
             state = .failed(error.localizedDescription)
         }
@@ -186,6 +190,7 @@ struct SessionPreviewView: View {
                     Text("Done").textStyle(.action).foregroundStyle(Palette.ink)
                 }
                 .frame(maxWidth: .infinity, minHeight: 64)
+                .transition(.opacity)
             } else if isToday {
                 Button {
                     model.startWorkout(session)
@@ -196,10 +201,12 @@ struct SessionPreviewView: View {
                     }
                 }
                 .buttonStyle(PrimaryButtonStyle())
+                .transition(.opacity)
             } else if session.status == .planned {
                 Text("Scheduled for \(session.date.weekday.fullName)")
                     .textStyle(.action).foregroundStyle(Palette.ink2)
                     .frame(maxWidth: .infinity, minHeight: 64)
+                    .transition(.opacity)
             }
         }
         .padding(.horizontal, 20)

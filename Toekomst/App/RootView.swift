@@ -4,15 +4,24 @@ import ToekomstKit
 
 struct RootView: View {
     @Environment(AppModel.self) private var model
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         @Bindable var model = model
-        TabView(selection: $model.selectedTab) {
-            tab(.today) { TodayView() }
-            tab(.schedule) { ScheduleView() }
-            tab(.progress) { ProgressScreen() }
-            tab(.settings) { SettingsView() }
+        // All four tabs stay alive (and keep their navigation state); switching
+        // fades and slides them flat instead of TabView's hard cut.
+        ZStack {
+            ForEach(AppTab.allCases, id: \.self) { tab in
+                let selected = tab == model.selectedTab
+                tabStack(tab)
+                    .opacity(selected ? 1 : 0)
+                    .offset(x: selected || reduceMotion ? 0 : offset(for: tab))
+                    .allowsHitTesting(selected)
+                    .accessibilityHidden(!selected)
+                    .zIndex(selected ? 1 : 0)
+            }
         }
+        .animation(Motion.page, value: model.selectedTab)
         .safeAreaInset(edge: .bottom, spacing: 0) {
             TorqueTabBar(selection: $model.selectedTab)
         }
@@ -28,20 +37,32 @@ struct RootView: View {
         }
     }
 
-    private func tab<Content: View>(_ tab: AppTab, @ViewBuilder content: () -> Content) -> some View {
+    /// Tabs to the left of the selected one wait on the left, and vice versa,
+    /// so a switch always travels in the direction of the tab bar.
+    private func offset(for tab: AppTab) -> CGFloat {
+        tab.index < model.selectedTab.index ? -Motion.pageOffset : Motion.pageOffset
+    }
+
+    @ViewBuilder
+    private func tabStack(_ tab: AppTab) -> some View {
         NavigationStack {
-            content()
-                .navigationDestination(for: Route.self) { route in
-                    switch route {
-                    case .session(let id, let backTitle):
-                        SessionPreviewView(sessionID: id, backTitle: backTitle)
-                    case .lift(let lift):
-                        LiftDetailView(lift: lift)
-                    }
+            Group {
+                switch tab {
+                case .today: TodayView()
+                case .schedule: ScheduleView()
+                case .progress: ProgressScreen()
+                case .settings: SettingsView()
                 }
+            }
+            .navigationDestination(for: Route.self) { route in
+                switch route {
+                case .session(let id, let backTitle):
+                    SessionPreviewView(sessionID: id, backTitle: backTitle)
+                case .lift(let lift):
+                    LiftDetailView(lift: lift)
+                }
+            }
         }
-        .toolbar(.hidden, for: .tabBar)
-        .tag(tab)
     }
 }
 
@@ -61,6 +82,7 @@ struct TorqueTabBar: View {
                         Text(tab.title).textStyle(.label)
                     }
                     .foregroundStyle(selected ? Palette.ink : Palette.ink3)
+                    .animation(Motion.flat, value: selected)
                     .frame(maxWidth: .infinity, minHeight: 44)
                     .contentShape(Rectangle())
                 }

@@ -13,6 +13,8 @@ enum AppTab: Hashable, CaseIterable {
         }
     }
 
+    var index: Int { Self.allCases.firstIndex(of: self) ?? 0 }
+
     var glyph: GlyphKind {
         switch self {
         case .today: return .tabToday
@@ -65,7 +67,8 @@ final class AppModel {
 
     func loadToday() async {
         do {
-            today = .loaded(try await repository.today())
+            let loaded = try await repository.today()
+            withAnimation(Motion.flat) { today = .loaded(loaded) }
         } catch {
             today = .failed(error.localizedDescription)
         }
@@ -81,7 +84,8 @@ final class AppModel {
         activeWorkout = WorkoutPlayerModel(
             session: session,
             repository: repository,
-            autoStartAfterRest: settings.autoStartAfterRest
+            autoStartAfterRest: settings.autoStartAfterRest,
+            logsSetDetails: settings.logSetDetails
         )
     }
 
@@ -118,6 +122,12 @@ final class AppSettings {
         didSet { defaults.set(autoStartAfterRest, forKey: Keys.autoStart) }
     }
 
+    /// Ask for weight, reps and effort after each set. Off: "Done set" logs the
+    /// plan and goes straight to rest.
+    var logSetDetails: Bool {
+        didSet { defaults.set(logSetDetails, forKey: Keys.logSetDetails) }
+    }
+
     var keepScreenOn: Bool {
         didSet { defaults.set(keepScreenOn, forKey: Keys.keepScreenOn) }
     }
@@ -130,6 +140,7 @@ final class AppSettings {
         self.defaults = defaults
         accent = AccentTheme(rawValue: defaults.string(forKey: Keys.accent) ?? "") ?? .volt
         autoStartAfterRest = defaults.object(forKey: Keys.autoStart) as? Bool ?? true
+        logSetDetails = defaults.object(forKey: Keys.logSetDetails) as? Bool ?? true
         keepScreenOn = defaults.object(forKey: Keys.keepScreenOn) as? Bool ?? true
         haptics = defaults.object(forKey: Keys.haptics) as? Bool ?? true
     }
@@ -137,6 +148,7 @@ final class AppSettings {
     private enum Keys {
         static let accent = "settings.accent"
         static let autoStart = "settings.autoStartAfterRest"
+        static let logSetDetails = "settings.logSetDetails"
         static let keepScreenOn = "settings.keepScreenOn"
         static let haptics = "settings.haptics"
     }

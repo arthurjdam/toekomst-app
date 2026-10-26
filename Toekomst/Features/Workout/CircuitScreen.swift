@@ -5,7 +5,9 @@ import ToekomstKit
 /// Between moves the same screen counts down the short rest.
 struct CircuitScreen: View {
     @Bindable var model: WorkoutPlayerModel
+    let stage: Namespace.ID
     @Environment(\.theme) private var theme
+    @Environment(\.displayScale) private var displayScale
 
     private var resting: Bool { model.circuitPhase == .rest }
 
@@ -15,9 +17,11 @@ struct CircuitScreen: View {
                 header(step: step, group: group)
                     .padding(.horizontal, 20)
                     .padding(.top, 4)
+                    .animation(Motion.flat, value: step)
 
                 VStack(spacing: 16) {
                     DemoFigure(demo: item.exercise.demo, code: item.exercise.code)
+                        .crossfade(on: item.id)
                         .frame(minHeight: 140, maxHeight: 208)
                         .background(Palette.surface1)
                         .clipShape(RoundedRectangle(cornerRadius: 20))
@@ -27,6 +31,7 @@ struct CircuitScreen: View {
                                 .padding(12)
                                 .accessibilityLabel("Exercise info and form cues")
                         }
+                        .stage(.card, in: stage)
                         .layoutPriority(-1)
 
                     HStack {
@@ -36,6 +41,8 @@ struct CircuitScreen: View {
                             }
                             Text(item.exercise.name).textStyle(.titleM).foregroundStyle(Palette.ink)
                                 .accessibilityAddTraits(.isHeader)
+                                .wipe(on: item.id)
+                                .stage(.title, in: stage)
                         }
                         Spacer()
                         if let load = model.engine.targetLoad(for: step) {
@@ -53,6 +60,7 @@ struct CircuitScreen: View {
                 .padding(.horizontal, 20)
                 .padding(.top, 4)
                 .frame(maxHeight: .infinity, alignment: .top)
+                .animation(Motion.flat, value: resting)
 
                 footer(item)
                     .padding(.horizontal, 20)
@@ -69,35 +77,42 @@ struct CircuitScreen: View {
             HStack {
                 Badge(text: model.session.kind.displayName, style: .signal, glyph: .boltFilled)
                 Spacer()
-                Text((group.title == "Circuit" ? "" : "\(group.title) · ") + "Round \(step.setNumber) of \(rounds)")
+                Text((group.title == "Circuit" ? "" : "\(group.title) · ") + "Round \(step.setNumber)/\(rounds) · Move \(step.itemIndex + 1)/\(moves)")
                     .textStyle(.label).foregroundStyle(Palette.ink)
+                    .wipe(on: step)
             }
-            HStack(spacing: 12) {
-                ForEach(1...rounds, id: \.self) { round in
-                    if round < step.setNumber {
-                        RoundedRectangle(cornerRadius: 2).fill(Palette.ink2).frame(width: 8, height: 8)
-                    } else if round > step.setNumber {
-                        RoundedRectangle(cornerRadius: 2).strokeBorder(Palette.lineStrong, lineWidth: 1).frame(width: 8, height: 8)
-                    } else {
-                        HStack(spacing: 3) {
-                            ForEach(0..<moves, id: \.self) { move in
-                                RoundedRectangle(cornerRadius: 2).fill(moveColor(move, current: step.itemIndex))
+            GeometryReader { geometry in
+                // Same pixel-snapped layout as the session bar, so the round
+                // squares' outlines stay crisp.
+                let openWidth = ProgressRowLayout.openWidth(
+                    total: geometry.size.width,
+                    squares: rounds - 1,
+                    gaps: CGFloat(rounds - 1) * 12,
+                    scale: displayScale
+                )
+                HStack(spacing: 12) {
+                    ForEach(1...rounds, id: \.self) { round in
+                        if round < step.setNumber {
+                            RoundedRectangle(cornerRadius: 2).fill(Palette.ink2).frame(width: 8, height: 8)
+                        } else if round > step.setNumber {
+                            RoundedRectangle(cornerRadius: 2).strokeBorder(Palette.lineStrong, lineWidth: 1).frame(width: 8, height: 8)
+                        } else {
+                            HStack(spacing: 3) {
+                                ForEach(0..<moves, id: \.self) { move in
+                                    RoundedRectangle(cornerRadius: 2).fill(moveColor(move, current: step.itemIndex))
+                                }
                             }
+                            .frame(width: openWidth, height: 8)
                         }
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 8)
                     }
                 }
+                .frame(maxHeight: .infinity)
             }
             .frame(height: 10)
             .accessibilityElement(children: .ignore)
             .accessibilityLabel("Round \(step.setNumber) of \(rounds), move \(step.itemIndex + 1) of \(moves)")
             HStack {
-                HStack(spacing: 8) {
-                    SetBoxes(total: moves, done: step.itemIndex, currentColor: theme.signal)
-                    Text("Move \(step.itemIndex + 1)/\(moves)").textStyle(.label).foregroundStyle(Palette.ink2)
-                }
-                .accessibilityHidden(true)
+                LiveIndicator(startedAt: model.engine.startedAt, isRunning: model.hasBegun && !model.isPaused)
                 Spacer()
                 WorkoutControls(model: model)
             }
@@ -123,10 +138,10 @@ struct CircuitScreen: View {
                         .foregroundStyle(resting ? Palette.ink2 : theme.signal)
                         .minimumScaleFactor(0.5)
                         .lineLimit(1)
-                        .contentTransition(.numericText(countsDown: true))
                     Spacer()
                     Text(resting ? "Rest · \(total)s" : "Work · \(total)s")
                         .textStyle(.label).foregroundStyle(Palette.ink2)
+                        .wipe(on: resting)
                         .padding(.bottom, 10)
                 }
                 HStack(spacing: 2) {
@@ -136,6 +151,7 @@ struct CircuitScreen: View {
                     }
                 }
                 .frame(height: 20)
+                .animation(Motion.tick, value: remaining)
             }
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(resting ? "Rest time remaining" : "Work time remaining")
@@ -186,7 +202,7 @@ struct CircuitScreen: View {
     private func footer(_ item: PlannedExercise) -> some View {
         if resting {
             Button {
-                model.endRest()
+                withAnimation(Motion.stage) { model.endRest() }
             } label: {
                 HStack(spacing: 8) {
                     Text("Skip rest")
@@ -194,10 +210,11 @@ struct CircuitScreen: View {
                 }
             }
             .buttonStyle(OutlineButtonStyle())
+            .stage(.primary, in: stage)
         } else if item.prescription.durationSeconds == nil {
             VStack(spacing: 8) {
                 Button {
-                    model.completeAsPlanned()
+                    withAnimation(Motion.stage) { model.completeAsPlanned() }
                 } label: {
                     HStack(spacing: 10) {
                         Glyph(.check, size: 20, weight: 2.25)
@@ -205,12 +222,13 @@ struct CircuitScreen: View {
                     }
                 }
                 .buttonStyle(PrimaryButtonStyle())
-                Button("Skip move") { model.skipCurrent() }
+                .stage(.primary, in: stage)
+                Button("Skip move") { withAnimation(Motion.stage) { model.skipCurrent() } }
                     .buttonStyle(QuietButtonStyle())
             }
         } else {
             Button {
-                model.skipCurrent()
+                withAnimation(Motion.stage) { model.skipCurrent() }
             } label: {
                 HStack(spacing: 8) {
                     Text("Skip move")
@@ -218,6 +236,7 @@ struct CircuitScreen: View {
                 }
             }
             .buttonStyle(OutlineButtonStyle())
+            .stage(.primary, in: stage)
         }
     }
 }

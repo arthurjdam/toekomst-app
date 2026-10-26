@@ -5,6 +5,8 @@ import ToekomstKit
 /// and starts the rest.
 struct LogSetSheet: View {
     let model: WorkoutPlayerModel
+    /// Called with weight, reps and reps in reserve when a reserve button is tapped.
+    let onLog: (Double?, Int, Int) -> Void
     @State private var load: Double?
     @State private var reps: Int
 
@@ -14,8 +16,9 @@ struct LogSetSheet: View {
     private let plannedLoad: Double?
 
     @MainActor
-    init(model: WorkoutPlayerModel) {
+    init(model: WorkoutPlayerModel, onLog: @escaping (Double?, Int, Int) -> Void) {
         self.model = model
+        self.onLog = onLog
         let step = model.currentStep
         let item = model.currentItem
         let target = item?.prescription.reps ?? RepTarget(exactly: 0)
@@ -59,6 +62,7 @@ struct LogSetSheet: View {
                         .foregroundStyle(noteColor)
                         .frame(maxWidth: .infinity)
                         .multilineTextAlignment(.center)
+                        .wipe(on: note)
                         .accessibilityAddTraits(.updatesFrequently)
                 }
                 reserve
@@ -121,7 +125,7 @@ struct LogSetSheet: View {
             HStack(spacing: 8) {
                 ForEach(0...4, id: \.self) { value in
                     Button {
-                        model.logSet(load: load, reps: reps, repsInReserve: value)
+                        onLog(load, reps, value)
                     } label: {
                         Text(value == 4 ? "4+" : "\(value)")
                             .textStyle(.metricM)

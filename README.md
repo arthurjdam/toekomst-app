@@ -95,9 +95,38 @@ range is hit on every set two sessions running, and loads hold when the ready
 check reports soreness or low energy. Bodyweight is tracked against +0.25 to
 0.5 lb a week.
 
+Motion follows two rules (`Toekomst/DesignSystem/Motion.swift`):
+
+- **Flat** for anything that can interpolate: pages, tabs, progress bars,
+  selection highlights, chart data and bar lengths slide, fade, resize or
+  recolor on one ease-out curve with no springs, scaling or blur.
+- **Workout screens morph** rather than swap: the exercise card, its name,
+  the weight, the set boxes and the main button are shared elements, so
+  logging a set shrinks the exercise card into the rest screen's "up next"
+  card and the name and weight travel with it. A logged set is applied once
+  the log sheet has closed, so this happens in view.
+- **Progress bar** in two steps: the set's tick fills left to right, then a
+  finished exercise collapses to a square while the next one opens into its
+  set ticks.
+- **Wipe** for text that swaps rather than moves: labels, numbers and
+  status text are covered by a white bar growing from the left, swap
+  underneath, and are revealed as the bar leaves towards the right (about
+  0.4 s). Demo figures cross-fade. Countdown digits tick without animation,
+  like a clock.
+
+With Reduce Motion on, page slides and workout morphs become fades and
+wipes are skipped.
+
+During a workout the header shows a **Live** indicator: a blinking signal
+square, the elapsed time with a blinking colon, and "Live" ("Paused" while
+paused).
+
 Additions beyond the designed screens:
 
-- Settings tab (auto-start next set, keep screen on, haptics, accent, fixture data)
+- Settings tab (auto-start next set, log each set, keep screen on, haptics,
+  accent, fixture data). With "Log each set" off, Done set logs the planned
+  weight and reps and goes straight to rest; such sets don't earn load
+  increases.
 - Daily check-in sheet, exercise info sheet, lift detail screen
 - Rest days, completed sessions and missed sessions on Today and Schedule
 - Pause menu (resume, skip a set, end and save, discard)
